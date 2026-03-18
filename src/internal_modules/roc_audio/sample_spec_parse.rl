@@ -211,13 +211,17 @@ bool parse_sample_spec_imp(const char* str, SampleSpec& sample_spec) {
         action set_format {
             char str[16] = {};
             strncat(str, start_p, p - start_p);
-            PcmFormat pcm_fmt = pcm_format_from_str(str);
-            if (pcm_fmt == PcmFormat_Invalid) {
-                roc_log(LogError, "parse sample spec: invalid sample format");
-                return false;
+            if (strcmp(str, "opus") == 0) {
+                sample_spec.set_sample_format(SampleFormat_Opus);
+            } else {
+                PcmFormat pcm_fmt = pcm_format_from_str(str);
+                if (pcm_fmt == PcmFormat_Invalid) {
+                    roc_log(LogError, "parse sample spec: invalid sample format");
+                    return false;
+                }
+                sample_spec.set_sample_format(SampleFormat_Pcm);
+                sample_spec.set_pcm_format(pcm_fmt);
             }
-            sample_spec.set_sample_format(SampleFormat_Pcm);
-            sample_spec.set_pcm_format(pcm_fmt);
         }
 
         action set_rate {

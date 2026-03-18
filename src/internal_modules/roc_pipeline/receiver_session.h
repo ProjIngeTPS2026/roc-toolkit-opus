@@ -46,6 +46,10 @@
 #include "roc_rtp/link_meter.h"
 #include "roc_rtp/parser.h"
 #include "roc_rtp/timestamp_injector.h"
+#ifdef ROC_TARGET_OPUS
+#include "roc_audio/opus_decoder.h"
+#include "roc_audio/opus_depacketizer.h"
+#endif
 
 namespace roc {
 namespace pipeline {
@@ -127,6 +131,9 @@ private:
     core::Optional<rtp::LinkMeter> repair_meter_;
 
     core::ScopedPtr<audio::IFrameDecoder> payload_decoder_;
+#ifdef ROC_TARGET_OPUS
+    core::Optional<audio::OpusDecoder> opus_payload_decoder_;
+#endif
 
     core::Optional<rtp::Filter> filter_;
     core::Optional<packet::DelayedReader> delayed_reader_;
@@ -139,7 +146,11 @@ private:
 
     core::Optional<rtp::TimestampInjector> timestamp_injector_;
 
-    core::Optional<audio::Depacketizer> depacketizer_;
+    core::Optional<audio::Depacketizer> pcm_depacketizer_;
+#ifdef ROC_TARGET_OPUS
+    core::Optional<audio::OpusDepacketizer> opus_depacketizer_;
+#endif
+    audio::IDepacketizer* depacketizer_;
 
     core::Optional<audio::ChannelMapperReader> channel_mapper_reader_;
 

@@ -23,11 +23,21 @@
 namespace roc {
 namespace audio {
 
+//! Depacketizer interface used by monitoring and session code.
+class IDepacketizer : public IFrameReader {
+public:
+    virtual ~IDepacketizer();
+
+    virtual bool is_valid() const = 0;
+    virtual bool is_started() const = 0;
+    virtual packet::stream_timestamp_t next_timestamp() const = 0;
+};
+
 //! Depacketizer.
 //! @remarks
 //!  Reads packets from a packet reader, decodes samples from packets using a
 //!  decoder, and produces an audio stream.
-class Depacketizer : public IFrameReader, public core::NonCopyable<> {
+class Depacketizer : public IDepacketizer, public core::NonCopyable<> {
 public:
     //! Initialization.
     //!
@@ -42,10 +52,10 @@ public:
                  bool beep);
 
     //! Was depacketizer constructed without errors?
-    bool is_valid() const;
+    virtual bool is_valid() const;
 
     //! Did depacketizer catch first packet?
-    bool is_started() const;
+    virtual bool is_started() const;
 
     //! Read audio frame.
     virtual bool read(Frame& frame);
@@ -53,7 +63,7 @@ public:
     //! Get next timestamp to be rendered.
     //! @pre
     //!  is_started() should return true
-    packet::stream_timestamp_t next_timestamp() const;
+    virtual packet::stream_timestamp_t next_timestamp() const;
 
 private:
     struct FrameInfo {

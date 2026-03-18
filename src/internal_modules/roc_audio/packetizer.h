@@ -42,11 +42,22 @@ struct PacketizerMetrics {
     }
 };
 
+//! Packetizer interface used by monitoring and session code.
+class IPacketizer : public IFrameWriter {
+public:
+    virtual ~IPacketizer();
+
+    virtual bool is_valid() const = 0;
+    virtual size_t sample_rate() const = 0;
+    virtual const PacketizerMetrics& metrics() const = 0;
+    virtual void flush() = 0;
+};
+
 //! Packetizer.
 //! @remarks
 //!  Gets an audio stream, encodes samples to packets using an encoder, and
 //!  writes packets to a packet writer.
-class Packetizer : public IFrameWriter, public core::NonCopyable<> {
+class Packetizer : public IPacketizer, public core::NonCopyable<> {
 public:
     //! Initialization.
     //!
@@ -68,13 +79,13 @@ public:
                const SampleSpec& sample_spec);
 
     //! Check if object is successfully constructed.
-    bool is_valid() const;
+    virtual bool is_valid() const;
 
     //! Get sample rate.
-    size_t sample_rate() const;
+    virtual size_t sample_rate() const;
 
     //! Get metrics.
-    const PacketizerMetrics& metrics() const;
+    virtual const PacketizerMetrics& metrics() const;
 
     //! Write audio frame.
     virtual void write(Frame& frame);
@@ -82,7 +93,7 @@ public:
     //! Flush buffered packet, if any.
     //! @remarks
     //!  Packet is padded to match fixed size.
-    void flush();
+    virtual void flush();
 
 private:
     bool begin_packet_();

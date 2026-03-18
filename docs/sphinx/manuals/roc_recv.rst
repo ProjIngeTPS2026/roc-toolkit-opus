@@ -17,7 +17,7 @@ Options
 -h, --help                    Print help and exit
 -V, --version                 Print version and exit
 -v, --verbose                 Increase verbosity level (may be used multiple times)
--L, --list-supported          list supported schemes and formats
+-L, --list-supported          list supported schemes, packet encodings, and formats
 -o, --output=IO_URI           Output file or device URI
 --output-format=FILE_FORMAT   Force output file format
 --backup=IO_URI               Backup file or device URI (if set, used when there are no sessions)
@@ -28,6 +28,7 @@ Options
 --miface=MIFACE               IPv4 or IPv6 address of the network interface on which to join the multicast group
 --reuseaddr                   enable SO_REUSEADDR when binding sockets
 --target-latency=STRING       Target latency, TIME units
+--packet-encoding=STRING      Expected packet encoding
 --io-latency=STRING           Playback target latency, TIME units
 --latency-tolerance=STRING    Maximum deviation from target latency, TIME units
 --no-play-timeout=STRING      No playback timeout, TIME units
@@ -84,6 +85,15 @@ Supported control protocols:
 
 - ``rtcp://``
 
+Packet encoding
+---------------
+
+Use ``--packet-encoding`` to declare expected network packet encoding explicitly.
+Supported values are ``l16-mono``, ``l16-stereo``, ``opus-mono``, and ``opus-stereo``.
+
+For Opus streams, receiver should be started with the matching ``--packet-encoding``
+value so it registers RTP payload type 112 or 113 before the first packet arrives.
+
 IO URI
 ------
 
@@ -109,7 +119,7 @@ Examples:
 - ``file:./test.wav``
 - ``file:-``
 
-The list of supported schemes and file formats can be retrieved using ``--list-supported`` option.
+The list of supported schemes, packet encodings, and file formats can be retrieved using ``--list-supported`` option.
 
 If the ``--output`` is omitted, the default driver and device are selected.
 If the ``--backup`` is omitted, no backup source is used.
@@ -177,6 +187,12 @@ Bind one bare RTP endpoint on all IPv4 interfaces:
 .. code::
 
     $ roc-recv -vv -s rtp://0.0.0.0:10001
+
+Bind receiver for an Opus stereo RTP stream:
+
+.. code::
+
+    $ roc-recv -vv -s rtp://0.0.0.0:10001 --packet-encoding=opus-stereo
 
 Bind source, repair, and control endpoints to all IPv4 interfaces (but not IPv6):
 

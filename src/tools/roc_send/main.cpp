@@ -9,6 +9,8 @@
 #include "roc_address/endpoint_uri.h"
 #include "roc_address/io_uri.h"
 #include "roc_address/print_supported.h"
+#include "roc_audio/opus_config.h"
+#include "roc_audio/print_supported.h"
 #include "roc_address/protocol_map.h"
 #include "roc_core/crash_handler.h"
 #include "roc_core/heap_arena.h"
@@ -20,6 +22,7 @@
 #include "roc_node/context.h"
 #include "roc_node/sender.h"
 #include "roc_pipeline/sender_sink.h"
+#include "roc_rtp/headers.h"
 #include "roc_sndio/backend_dispatcher.h"
 #include "roc_sndio/backend_map.h"
 #include "roc_sndio/print_supported.h"
@@ -27,7 +30,70 @@
 
 #include "roc_send/cmdline.h"
 
+#include <cstring>
+
 using namespace roc;
+
+namespace {
+
+bool parse_packet_encoding(const char* str, unsigned& payload_type) {
+    if (!str || strcmp(str, "l16-mono") == 0) {
+        payload_type = rtp::PayloadType_L16_Mono;
+        return true;
+    }
+    if (strcmp(str, "l16-stereo") == 0) {
+        payload_type = rtp::PayloadType_L16_Stereo;
+        return true;
+    }
+    if (strcmp(str, "opus-mono") == 0) {
+        payload_type = rtp::PayloadType_Opus_Mono;
+        return true;
+    }
+    if (strcmp(str, "opus-stereo") == 0) {
+        payload_type = rtp::PayloadType_Opus_Stereo;
+        return true;
+    }
+    return false;
+}
+
+bool parse_opus_application(const char* str, audio::OpusApplication& application) {
+    if (!str || strcmp(str, "audio") == 0) {
+        application = audio::OpusApplication_Audio;
+        return true;
+    }
+    if (strcmp(str, "voip") == 0) {
+        application = audio::OpusApplication_Voip;
+        return true;
+    }
+    if (strcmp(str, "lowdelay") == 0) {
+        application = audio::OpusApplication_LowDelay;
+        return true;
+    }
+    return false;
+}
+
+bool parse_opus_vbr(const char* str, audio::OpusVbrMode& vbr) {
+    if (!str || strcmp(str, "constrained") == 0) {
+        vbr = audio::OpusVbr_Constrained;
+        return true;
+    }
+    if (strcmp(str, "off") == 0) {
+        vbr = audio::OpusVbr_Off;
+        return true;
+    }
+    if (strcmp(str, "on") == 0) {
+        vbr = audio::OpusVbr_On;
+        return true;
+    }
+    return false;
+}
+
+bool is_opus_payload(unsigned payload_type) {
+    return payload_type == rtp::PayloadType_Opus_Mono
+        || payload_type == rtp::PayloadType_Opus_Stereo;
+}
+
+} // namespace
 
 int main(int argc, char** argv) {
     core::HeapArena::set_guards(core::HeapArena_DefaultGuards
@@ -164,6 +230,68 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (args.packet_encoding_given) {
+        if (!parse_packet_encoding(args.packet_encoding_arg, sender_config.payload_type)) {
+            roc_log(LogError, "invalid --packet-encoding");
+            return 1;
+        }
+    }
+
+    if (args.opus_bitrate_given) {
+        if (args.opus_bitrate_arg <= 0) {
+            roc_log(LogError, "invalid --opus-bitrate: should be > 0");
+            return 1;
+        }
+        sender_config.opus.bitrate = args.opus_bitrate_arg;
+    }
+
+    if (args.opus_complexity_given) {
+        if (args.opus_complexity_arg < 0 || args.opus_complexity_arg > 10) {
+            roc_log(LogError, "invalid --opus-complexity: expected [0; 10]");
+            return 1;
+        }
+        sender_config.opus.complexity = (unsigned)args.opus_complexity_arg;
+    }
+
+    if (args.opus_application_given
+        && !parse_opus_application(args.opus_application_arg,
+                                   sender_config.opus.application)) {
+        roc_log(LogError, "invalid --opus-application");
+        return 1;
+    }
+
+    if (args.opus_vbr_given && !parse_opus_vbr(args.opus_vbr_arg, sender_config.opus.vbr)) {
+        roc_log(LogError, "invalid --opus-vbr");
+        return 1;
+    }
+
+    sender_config.opus.enable_inband_fec = args.opus_fec_flag;
+    sender_config.opus.enable_dtx = args.opus_dtx_flag;
+
+    if (args.opus_loss_pct_given) {
+        if (args.opus_loss_pct_arg < 0 || args.opus_loss_pct_arg > 100) {
+            roc_log(LogError, "invalid --opus-loss-pct: expected [0; 100]");
+            return 1;
+        }
+        sender_config.opus.expected_loss_percent = (unsigned)args.opus_loss_pct_arg;
+    }
+
+    if (is_opus_payload(sender_config.payload_type)) {
+        if (sender_config.packet_length != 0
+            && !audio::is_opus_packet_length(sender_config.packet_length)) {
+            roc_log(LogError, "invalid --packet-len for Opus");
+            return 1;
+        }
+
+        sender_config.opus.deduce_defaults(
+            sender_config.payload_type == rtp::PayloadType_Opus_Stereo ? 2 : 1);
+        if (!sender_config.opus.is_valid(
+                sender_config.payload_type == rtp::PayloadType_Opus_Stereo ? 2 : 1)) {
+            roc_log(LogError, "invalid Opus encoder configuration");
+            return 1;
+        }
+    }
+
     if (args.latency_tolerance_given) {
         if (!core::parse_duration(args.latency_tolerance_arg,
                                   sender_config.latency.latency_tolerance)) {
@@ -274,6 +402,10 @@ int main(int argc, char** argv) {
             return 1;
         }
 
+        if (!audio::print_supported()) {
+            return 1;
+        }
+
         if (!sndio::print_supported(backend_dispatcher, context.arena())) {
             return 1;
         }
@@ -325,6 +457,13 @@ int main(int argc, char** argv) {
                 "can't detect input encoding, try to set it "
                 "explicitly with --rate option");
         return 1;
+    }
+
+    if (is_opus_payload(sender_config.payload_type)) {
+        if (!context.encoding_map().add_builtin_encoding(sender_config.payload_type)) {
+            roc_log(LogError, "can't enable requested Opus packet encoding");
+            return 1;
+        }
     }
 
     node::Sender sender(context, sender_config);

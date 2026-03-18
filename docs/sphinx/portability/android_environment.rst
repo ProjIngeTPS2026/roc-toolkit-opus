@@ -42,7 +42,7 @@ Example:
             --disable-tests \
             --disable-pulseaudio \
             --disable-sox \
-            --build-3rdparty=libuv,openfec
+            --build-3rdparty=libuv,openfec,opus
 
 Tools caching
 =============

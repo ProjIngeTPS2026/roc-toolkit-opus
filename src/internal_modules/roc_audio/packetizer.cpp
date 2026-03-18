@@ -15,6 +15,9 @@
 namespace roc {
 namespace audio {
 
+IPacketizer::~IPacketizer() {
+}
+
 Packetizer::Packetizer(packet::IWriter& writer,
                        packet::IComposer& composer,
                        packet::ISequencer& sequencer,

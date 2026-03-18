@@ -16,6 +16,9 @@ const char* sample_format_to_str(SampleFormat format) {
     case SampleFormat_Pcm:
         return "pcm";
 
+    case SampleFormat_Opus:
+        return "opus";
+
     case SampleFormat_Invalid:
         break;
     }

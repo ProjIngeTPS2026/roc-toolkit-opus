@@ -44,6 +44,7 @@ Protocols and encodings
 * RTP
 
   * RTP AVPF L16 encoding (lossless 44100Hz PCM 16-bit stereo or mono)
+  * built-in Opus encoding (lossy 48000Hz mono or stereo)
 
 * RTCP
 

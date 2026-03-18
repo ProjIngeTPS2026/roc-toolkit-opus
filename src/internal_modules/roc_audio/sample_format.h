@@ -28,6 +28,10 @@ enum SampleFormat {
     //! What specific PCM coding and endian is used is defined
     //! by PcmFormat enum.
     SampleFormat_Pcm,
+
+    //! Opus compressed format.
+    //! Used only for network packet encodings.
+    SampleFormat_Opus,
 };
 
 //! Get string name of sample format.

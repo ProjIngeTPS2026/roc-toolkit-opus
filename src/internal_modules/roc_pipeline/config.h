@@ -15,6 +15,7 @@
 #include "roc_address/protocol.h"
 #include "roc_audio/feedback_monitor.h"
 #include "roc_audio/latency_tuner.h"
+#include "roc_audio/opus_config.h"
 #include "roc_audio/profiler.h"
 #include "roc_audio/resampler_config.h"
 #include "roc_audio/sample_spec.h"
@@ -67,6 +68,9 @@ struct SenderSinkConfig {
 
     //! Packet length, in nanoseconds.
     core::nanoseconds_t packet_length;
+
+    //! Opus encoder parameters.
+    audio::OpusConfig opus;
 
     //! FEC writer parameters.
     fec::WriterConfig fec_writer;

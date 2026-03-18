@@ -12,6 +12,6 @@ scons -Q \
       --disable-soversion \
       --disable-tools \
       --disable-openssl \
-      --build-3rdparty=libuv,openfec,speexdsp,cpputest \
+      --build-3rdparty=libuv,openfec,opus,speexdsp,cpputest \
       --compiler=clang \
       --host="$TOOLCHAIN"

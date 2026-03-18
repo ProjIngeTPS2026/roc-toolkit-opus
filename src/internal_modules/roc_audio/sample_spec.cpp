@@ -178,6 +178,10 @@ SampleFormat SampleSpec::sample_format() const {
 
 void SampleSpec::set_sample_format(SampleFormat sample_fmt) {
     sample_fmt_ = sample_fmt;
+    if (sample_fmt_ != SampleFormat_Pcm) {
+        pcm_fmt_ = PcmFormat_Invalid;
+        pcm_width_ = 0;
+    }
 }
 
 PcmFormat SampleSpec::pcm_format() const {

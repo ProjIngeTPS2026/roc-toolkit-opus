@@ -15,7 +15,7 @@ namespace pipeline {
 SenderSinkConfig::SenderSinkConfig()
     : input_sample_spec(DefaultSampleSpec)
     , payload_type(rtp::PayloadType_L16_Stereo)
-    , packet_length(DefaultPacketLength)
+    , packet_length(0)
     , enable_timing(false)
     , enable_auto_duration(false)
     , enable_auto_cts(false)
@@ -24,6 +24,24 @@ SenderSinkConfig::SenderSinkConfig()
 }
 
 void SenderSinkConfig::deduce_defaults() {
+    if (packet_length == 0) {
+        switch (payload_type) {
+        case rtp::PayloadType_Opus_Mono:
+        case rtp::PayloadType_Opus_Stereo:
+            packet_length = audio::OpusDefaultPacketLength;
+            break;
+        default:
+            packet_length = DefaultPacketLength;
+            break;
+        }
+    }
+
+    if (payload_type == rtp::PayloadType_Opus_Mono) {
+        opus.deduce_defaults(1);
+    } else if (payload_type == rtp::PayloadType_Opus_Stereo) {
+        opus.deduce_defaults(2);
+    }
+
     latency.deduce_defaults(DefaultLatency, false);
     resampler.deduce_defaults(latency.tuner_backend, latency.tuner_profile);
 }

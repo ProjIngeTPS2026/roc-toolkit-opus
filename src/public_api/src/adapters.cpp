@@ -11,13 +11,82 @@
 #include "roc_address/interface.h"
 #include "roc_audio/channel_defs.h"
 #include "roc_audio/freq_estimator.h"
+#include "roc_audio/opus_config.h"
 #include "roc_audio/pcm_format.h"
 #include "roc_audio/resampler_config.h"
 #include "roc_core/attributes.h"
 #include "roc_core/log.h"
 
+#include <cstring>
+
 namespace roc {
 namespace api {
+
+#ifdef __clang__
+template <class T> ROC_ATTR_NO_SANITIZE_UB T enum_from_user(T t);
+#else
+template <class T> ROC_ATTR_NO_SANITIZE_UB int enum_from_user(T t);
+#endif
+
+namespace {
+
+bool ensure_builtin_encoding_registered(node::Context& context, unsigned int payload_type) {
+    switch (payload_type) {
+    case rtp::PayloadType_L16_Mono:
+    case rtp::PayloadType_L16_Stereo:
+    case rtp::PayloadType_Opus_Mono:
+    case rtp::PayloadType_Opus_Stereo:
+        return context.encoding_map().add_builtin_encoding(payload_type);
+    default:
+        return true;
+    }
+}
+
+bool opus_application_from_user(audio::OpusApplication& out, roc_opus_application in) {
+    switch (enum_from_user(in)) {
+    case ROC_OPUS_APPLICATION_DEFAULT:
+        out = audio::OpusApplication_Default;
+        return true;
+
+    case ROC_OPUS_APPLICATION_AUDIO:
+        out = audio::OpusApplication_Audio;
+        return true;
+
+    case ROC_OPUS_APPLICATION_VOIP:
+        out = audio::OpusApplication_Voip;
+        return true;
+
+    case ROC_OPUS_APPLICATION_LOWDELAY:
+        out = audio::OpusApplication_LowDelay;
+        return true;
+    }
+
+    return false;
+}
+
+bool opus_vbr_mode_from_user(audio::OpusVbrMode& out, roc_opus_vbr_mode in) {
+    switch (enum_from_user(in)) {
+    case ROC_OPUS_VBR_DEFAULT:
+        out = audio::OpusVbr_Default;
+        return true;
+
+    case ROC_OPUS_VBR_OFF:
+        out = audio::OpusVbr_Off;
+        return true;
+
+    case ROC_OPUS_VBR_ON:
+        out = audio::OpusVbr_On;
+        return true;
+
+    case ROC_OPUS_VBR_CONSTRAINED:
+        out = audio::OpusVbr_Constrained;
+        return true;
+    }
+
+    return false;
+}
+
+} // namespace
 
 // Note: ROC_ATTR_NO_SANITIZE_UB is used from *_from_user() functions because we don't
 // want sanitizers to fail us when enums contain arbitrary values; we correctly handle
@@ -68,6 +137,15 @@ bool sender_config_from_user(node::Context& context,
                     " should be zero or valid encoding id");
             return false;
         }
+
+        if (!ensure_builtin_encoding_registered(context, out.payload_type)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_sender_config.packet_encoding:"
+                    " failed to register built-in encoding %u",
+                    out.payload_type);
+            return false;
+        }
+
         const rtp::Encoding* encoding =
             context.encoding_map().find_by_pt(out.payload_type);
         if (!encoding) {
@@ -92,6 +170,46 @@ bool sender_config_from_user(node::Context& context,
 
     if (in.packet_length != 0) {
         out.packet_length = (core::nanoseconds_t)in.packet_length;
+    }
+
+    if (out.payload_type == rtp::PayloadType_Opus_Mono
+        || out.payload_type == rtp::PayloadType_Opus_Stereo) {
+        out.opus.bitrate = in.opus_bitrate;
+        out.opus.complexity = in.opus_complexity;
+        out.opus.enable_inband_fec = in.opus_inband_fec != 0;
+        out.opus.enable_dtx = in.opus_dtx != 0;
+        out.opus.expected_loss_percent = in.opus_expected_loss_percent;
+
+        if (!opus_application_from_user(out.opus.application, in.opus_application)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_sender_config.opus_application");
+            return false;
+        }
+
+        if (!opus_vbr_mode_from_user(out.opus.vbr, in.opus_vbr_mode)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_sender_config.opus_vbr_mode");
+            return false;
+        }
+
+        out.opus.deduce_defaults(out.payload_type == rtp::PayloadType_Opus_Stereo ? 2 : 1);
+
+        if (out.packet_length == 0) {
+            out.packet_length = audio::OpusDefaultPacketLength;
+        }
+
+        if (!audio::is_opus_packet_length(out.packet_length)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_sender_config.packet_length:"
+                    " unsupported Opus frame duration");
+            return false;
+        }
+
+        if (!out.opus.is_valid(out.payload_type == rtp::PayloadType_Opus_Stereo ? 2 : 1)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_sender_config Opus parameters");
+            return false;
+        }
     }
 
     if (in.target_latency != 0) {
@@ -161,7 +279,7 @@ bool sender_config_from_user(node::Context& context,
 }
 
 ROC_ATTR_NO_SANITIZE_UB
-bool receiver_config_from_user(node::Context&,
+bool receiver_config_from_user(node::Context& context,
                                pipeline::ReceiverSourceConfig& out,
                                const roc_receiver_config& in) {
     if (in.target_latency != 0) {
@@ -190,6 +308,32 @@ bool receiver_config_from_user(node::Context&,
         roc_log(LogError,
                 "bad configuration: invalid roc_receiver_config.frame_encoding");
         return false;
+    }
+
+    if (in.packet_encoding != 0) {
+        if (!packet_encoding_from_user(out.session_defaults.payload_type,
+                                       in.packet_encoding)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_receiver_config.packet_encoding");
+            return false;
+        }
+
+        if (!ensure_builtin_encoding_registered(context,
+                                                out.session_defaults.payload_type)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_receiver_config.packet_encoding:"
+                    " failed to register built-in encoding %u",
+                    out.session_defaults.payload_type);
+            return false;
+        }
+
+        if (!context.encoding_map().find_by_pt(out.session_defaults.payload_type)) {
+            roc_log(LogError,
+                    "bad configuration: invalid roc_receiver_config.packet_encoding:"
+                    " no built-in or registered encoding found with id %u",
+                    out.session_defaults.payload_type);
+            return false;
+        }
     }
 
     if (!clock_source_from_user(out.common.enable_timing, in.clock_source)) {
@@ -482,6 +626,14 @@ bool packet_encoding_from_user(unsigned& out_pt, roc_packet_encoding in) {
 
     case ROC_PACKET_ENCODING_AVP_L16_STEREO:
         out_pt = rtp::PayloadType_L16_Stereo;
+        return true;
+
+    case ROC_PACKET_ENCODING_OPUS_MONO:
+        out_pt = rtp::PayloadType_Opus_Mono;
+        return true;
+
+    case ROC_PACKET_ENCODING_OPUS_STEREO:
+        out_pt = rtp::PayloadType_Opus_Stereo;
         return true;
     }
 

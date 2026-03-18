@@ -97,6 +97,11 @@ Runtime dependencies
      - Apache
      - optional, used for SRTP and DTLS support and CSPRNG
 
+   * - `Opus <https://opus-codec.org/>`_
+     - >= 1.1 (recommended 1.5.2)
+     - BSD
+     - optional, used for network audio compression
+
    * - `PulseAudio <https://www.freedesktop.org/wiki/Software/PulseAudio/>`_
      - >= 5.0
      - LGPL

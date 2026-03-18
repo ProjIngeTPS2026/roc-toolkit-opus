@@ -204,6 +204,11 @@ AddOption('--disable-speexdsp',
           action='store_true',
           help='disable SpeexDSP support for resampling')
 
+AddOption('--disable-opus',
+          dest='disable_opus',
+          action='store_true',
+          help='disable Opus support for network audio compression')
+
 AddOption('--disable-sox',
           dest='disable_sox',
           action='store_true',
@@ -834,6 +839,11 @@ else:
     if not GetOption('disable_speexdsp'):
         env.Append(ROC_TARGETS=[
             'target_speexdsp',
+        ])
+
+    if not GetOption('disable_opus'):
+        env.Append(ROC_TARGETS=[
+            'target_opus',
         ])
 
     if not GetOption('disable_tools'):

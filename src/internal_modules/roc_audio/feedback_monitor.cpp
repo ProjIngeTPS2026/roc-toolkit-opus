@@ -16,7 +16,7 @@ namespace roc {
 namespace audio {
 
 FeedbackMonitor::FeedbackMonitor(IFrameWriter& writer,
-                                 Packetizer& packetizer,
+                                 IPacketizer& packetizer,
                                  ResamplerWriter* resampler,
                                  const FeedbackConfig& feedback_config,
                                  const LatencyConfig& latency_config,

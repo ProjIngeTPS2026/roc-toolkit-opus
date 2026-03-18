@@ -16,20 +16,39 @@ namespace rtp {
 TEST_GROUP(encoding) {};
 
 TEST(encoding, parse) {
-    Encoding enc;
-    CHECK(parse_encoding("101:s18/48000/surround4.1", enc));
+    {
+        Encoding enc;
+        CHECK(parse_encoding("101:s18/48000/surround4.1", enc));
 
-    CHECK_EQUAL(101, enc.payload_type);
+        CHECK_EQUAL(101, enc.payload_type);
 
-    CHECK(enc.sample_spec.is_valid());
-    CHECK_EQUAL(audio::SampleFormat_Pcm, enc.sample_spec.sample_format());
-    CHECK_EQUAL(audio::PcmFormat_SInt18, enc.sample_spec.pcm_format());
-    CHECK_EQUAL(48000, enc.sample_spec.sample_rate());
-    CHECK_EQUAL(5, enc.sample_spec.num_channels());
+        CHECK(enc.sample_spec.is_valid());
+        CHECK_EQUAL(audio::SampleFormat_Pcm, enc.sample_spec.sample_format());
+        CHECK_EQUAL(audio::PcmFormat_SInt18, enc.sample_spec.pcm_format());
+        CHECK_EQUAL(48000, enc.sample_spec.sample_rate());
+        CHECK_EQUAL(5, enc.sample_spec.num_channels());
 
-    CHECK_EQUAL(packet::Packet::FlagAudio, enc.packet_flags);
-    CHECK(enc.new_encoder == NULL);
-    CHECK(enc.new_decoder == NULL);
+        CHECK_EQUAL(packet::Packet::FlagAudio, enc.packet_flags);
+        CHECK(enc.new_encoder == NULL);
+        CHECK(enc.new_decoder == NULL);
+    }
+
+    {
+        Encoding enc;
+        CHECK(parse_encoding("112:opus/48000/mono", enc));
+
+        CHECK_EQUAL(112, enc.payload_type);
+
+        CHECK(enc.sample_spec.is_valid());
+        CHECK_EQUAL(audio::SampleFormat_Opus, enc.sample_spec.sample_format());
+        CHECK_EQUAL(audio::PcmFormat_Invalid, enc.sample_spec.pcm_format());
+        CHECK_EQUAL(48000, enc.sample_spec.sample_rate());
+        CHECK_EQUAL(1, enc.sample_spec.num_channels());
+
+        CHECK_EQUAL(packet::Packet::FlagAudio, enc.packet_flags);
+        CHECK(enc.new_encoder == NULL);
+        CHECK(enc.new_decoder == NULL);
+    }
 }
 
 TEST(encoding, parse_errors) {

@@ -23,6 +23,7 @@ ReceiverSession::ReceiverSession(const ReceiverSessionConfig& session_config,
                                  core::IArena& arena)
     : core::RefCounted<ReceiverSession, core::ArenaAllocation>(arena)
     , frame_reader_(NULL)
+    , depacketizer_(NULL)
     , valid_(false) {
     const rtp::Encoding* pkt_encoding =
         encoding_map.find_by_pt(session_config.payload_type);
@@ -62,14 +63,30 @@ ReceiverSession::ReceiverSession(const ReceiverSessionConfig& session_config,
     // packets stored in the queues.
     packet::IReader* pkt_reader = source_queue_.get();
 
-    payload_decoder_.reset(pkt_encoding->new_decoder(arena, pkt_encoding->sample_spec),
-                           arena);
-    if (!payload_decoder_) {
+    audio::IFrameDecoder* filter_decoder = NULL;
+
+    if (pkt_encoding->sample_spec.sample_format() == audio::SampleFormat_Opus) {
+#ifdef ROC_TARGET_OPUS
+        opus_payload_decoder_.reset(
+            new (opus_payload_decoder_) audio::OpusDecoder(arena, pkt_encoding->sample_spec));
+        if (!opus_payload_decoder_ || !opus_payload_decoder_->is_valid()) {
+            return;
+        }
+        filter_decoder = opus_payload_decoder_.get();
+#else
         return;
+#endif
+    } else {
+        payload_decoder_.reset(pkt_encoding->new_decoder(arena, pkt_encoding->sample_spec),
+                               arena);
+        if (!payload_decoder_) {
+            return;
+        }
+        filter_decoder = payload_decoder_.get();
     }
 
     filter_.reset(new (filter_)
-                      rtp::Filter(*pkt_reader, *payload_decoder_,
+                      rtp::Filter(*pkt_reader, *filter_decoder,
                                   common_config.rtp_filter, pkt_encoding->sample_spec));
     if (!filter_) {
         return;
@@ -122,7 +139,7 @@ ReceiverSession::ReceiverSession(const ReceiverSessionConfig& session_config,
         }
         pkt_reader = fec_reader_.get();
 
-        fec_filter_.reset(new (fec_filter_) rtp::Filter(*pkt_reader, *payload_decoder_,
+        fec_filter_.reset(new (fec_filter_) rtp::Filter(*pkt_reader, *filter_decoder,
                                                         common_config.rtp_filter,
                                                         pkt_encoding->sample_spec));
         if (!fec_filter_) {
@@ -151,12 +168,27 @@ ReceiverSession::ReceiverSession(const ReceiverSessionConfig& session_config,
                                          audio::Sample_RawFormat,
                                          pkt_encoding->sample_spec.channel_set());
 
-        depacketizer_.reset(new (depacketizer_) audio::Depacketizer(
-            *pkt_reader, *payload_decoder_, out_spec, session_config.enable_beeping));
-        if (!depacketizer_ || !depacketizer_->is_valid()) {
+        if (pkt_encoding->sample_spec.sample_format() == audio::SampleFormat_Opus) {
+#ifdef ROC_TARGET_OPUS
+            opus_depacketizer_.reset(new (opus_depacketizer_) audio::OpusDepacketizer(
+                *pkt_reader, *opus_payload_decoder_, out_spec,
+                session_config.enable_beeping, arena));
+            if (!opus_depacketizer_ || !opus_depacketizer_->is_valid()) {
+                return;
+            }
+            depacketizer_ = opus_depacketizer_.get();
+#else
             return;
+#endif
+        } else {
+            pcm_depacketizer_.reset(new (pcm_depacketizer_) audio::Depacketizer(
+                *pkt_reader, *payload_decoder_, out_spec, session_config.enable_beeping));
+            if (!pcm_depacketizer_ || !pcm_depacketizer_->is_valid()) {
+                return;
+            }
+            depacketizer_ = pcm_depacketizer_.get();
         }
-        frm_reader = depacketizer_.get();
+        frm_reader = depacketizer_;
 
         if (session_config.watchdog.no_playback_timeout >= 0
             || session_config.watchdog.choppy_playback_timeout >= 0) {

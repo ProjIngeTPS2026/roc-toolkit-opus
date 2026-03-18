@@ -142,6 +142,63 @@ TEST(loopback_sender_2_receiver, bare_rtp) {
     sender.join();
 }
 
+#ifdef ROC_TARGET_OPUS
+TEST(loopback_sender_2_receiver, opus_mono_rtp) {
+    enum { Flags = test::FlagNonStrict, FrameChans = 1, PacketChans = 1 };
+
+    init_config(Flags, FrameChans, PacketChans);
+
+    sender_conf.packet_encoding = ROC_PACKET_ENCODING_OPUS_MONO;
+    sender_conf.packet_length = 20000000ull;
+    receiver_conf.packet_encoding = ROC_PACKET_ENCODING_OPUS_MONO;
+
+    test::Context context;
+
+    test::Receiver receiver(context, receiver_conf, sample_step, FrameChans,
+                            test::FrameSamples, Flags);
+
+    receiver.bind();
+
+    test::Sender sender(context, sender_conf, sample_step, FrameChans, test::FrameSamples,
+                        Flags);
+
+    sender.connect(receiver.source_endpoint(), receiver.repair_endpoint(), NULL);
+
+    CHECK(sender.start());
+    receiver.receive();
+    sender.stop();
+    sender.join();
+}
+
+TEST(loopback_sender_2_receiver, opus_stereo_rtp_rtcp) {
+    enum { Flags = test::FlagNonStrict | test::FlagRTCP, FrameChans = 2, PacketChans = 2 };
+
+    init_config(Flags, FrameChans, PacketChans);
+
+    sender_conf.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+    sender_conf.packet_length = 20000000ull;
+    receiver_conf.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+
+    test::Context context;
+
+    test::Receiver receiver(context, receiver_conf, sample_step, FrameChans,
+                            test::FrameSamples, Flags);
+
+    receiver.bind();
+
+    test::Sender sender(context, sender_conf, sample_step, FrameChans, test::FrameSamples,
+                        Flags);
+
+    sender.connect(receiver.source_endpoint(), receiver.repair_endpoint(),
+                   receiver.control_endpoint());
+
+    CHECK(sender.start());
+    receiver.receive();
+    sender.stop();
+    sender.join();
+}
+#endif
+
 TEST(loopback_sender_2_receiver, rtp_rtcp) {
     enum { Flags = test::FlagRTCP, FrameChans = 2, PacketChans = 2 };
 

@@ -55,7 +55,7 @@ Disable specific dependencies (and features they provide):
 .. code::
 
     $ scons -Q --build-3rdparty=... --disable-libunwind --disable-openfec \
-      --disable-speexdsp --disable-sox --disable-pulseaudio
+      --disable-opus --disable-speexdsp --disable-sox --disable-pulseaudio
 
 Compiler options
 ================
@@ -137,7 +137,7 @@ Download and build selected dependencies, then build everything:
 
 .. code::
 
-    $ scons -Q --build-3rdparty=libuv:1.4.2,libunwind,openfec,cpputest ...
+    $ scons -Q --build-3rdparty=libuv:1.4.2,libunwind,openfec,opus,cpputest ...
 
 Download and build all dependencies, then build everything:
 

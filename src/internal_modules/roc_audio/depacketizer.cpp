@@ -32,6 +32,9 @@ inline void write_beep(sample_t* buf, size_t bufsz) {
 
 } // namespace
 
+IDepacketizer::~IDepacketizer() {
+}
+
 Depacketizer::Depacketizer(packet::IReader& reader,
                            IFrameDecoder& payload_decoder,
                            const SampleSpec& sample_spec,

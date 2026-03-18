@@ -64,6 +64,7 @@ Options
 --disable-soversion                            don't write version into the shared library and don't create version symlinks
 --disable-openfec                              disable OpenFEC support required for FEC codes
 --disable-speexdsp                             disable SpeexDSP support for resampling
+--disable-opus                                 disable Opus support for network audio compression
 --disable-sox                                  disable SoX support in tools
 --disable-openssl                              disable OpenSSL support required for DTLS and SRTP
 --disable-libunwind                            disable libunwind support required for printing backtrace
@@ -74,7 +75,7 @@ Options
 --with-libraries=WITH_LIBRARIES                additional library search path, may be used multiple times
 --macos-platform=MACOS_PLATFORM                macOS target platform, e.g. 10.12, (default is current OS version)
 --macos-arch=MACOS_ARCH                        macOS target architecture(s), comma-separated list, supported values: 'all', 'x86_64', 'arm64' (default is current OS arch, pass multiple values or 'all' for univeral binaries)
---build-3rdparty=BUILD_3RDPARTY                download and build specified 3rdparty libraries, comma-separated list of library names and optional versions, e.g. 'libuv:1.4.2,openfec'
+--build-3rdparty=BUILD_3RDPARTY                download and build specified 3rdparty libraries, comma-separated list of library names and optional versions, e.g. 'libuv:1.4.2,openfec,opus'
 --override-targets=OVERRIDE_TARGETS            override targets to use, pass a comma-separated list of target names, e.g. 'pc,posix,posix_ext,gnu,libuv,openfec,...'
 
 Variables

@@ -62,7 +62,7 @@ public:
     //! Constructor.
     LatencyMonitor(IFrameReader& frame_reader,
                    const packet::SortedQueue& incoming_queue,
-                   const Depacketizer& depacketizer,
+                   const IDepacketizer& depacketizer,
                    const packet::ILinkMeter& link_meter,
                    ResamplerReader* resampler,
                    const LatencyConfig& config,
@@ -110,7 +110,7 @@ private:
     IFrameReader& frame_reader_;
 
     const packet::SortedQueue& incoming_queue_;
-    const Depacketizer& depacketizer_;
+    const IDepacketizer& depacketizer_;
     const packet::ILinkMeter& link_meter_;
 
     ResamplerReader* resampler_;

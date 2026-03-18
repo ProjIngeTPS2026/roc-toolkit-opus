@@ -53,14 +53,14 @@ Command-line tools package for roc-toolkit
 %setup -n %{name}-%{version}
 
 %build
-scons --build-3rdparty=openfec \
+scons --build-3rdparty=openfec,opus \
   --prefix=/usr \
   --libdir=%{_libdir} \
   %{?_smp_mflags} \
   CFLAGS="%{build_cflags}" CXXFLAGS="%{build_cxxflags}" LDFLAGS="%{build_ldflags}"
 
 %install
-scons --build-3rdparty=openfec \
+scons --build-3rdparty=openfec,opus \
   --prefix=/usr \
   --libdir=%{_libdir} \
   %{?_smp_mflags} \

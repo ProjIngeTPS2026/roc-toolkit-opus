@@ -23,6 +23,7 @@ thirdparty_versions = {
     'ltdl':             '2.4.6',
     'openfec':          '1.4.2.12',
     'openssl':          '3.0.8',
+    'opus':             '1.5.2',
     'pulseaudio':       '12.2',
     'sndfile':          '1.0.26',
     'sox':              '14.4.2',
@@ -231,6 +232,22 @@ elif 'speexdsp' in system_dependencies:
     if not conf.CheckLibWithHeaderExt('speexdsp', 'speex/speex_resampler.h', 'C',
                                           run=not is_crosscompiling):
         env.Die("speexdsp not found (see 'config.log' for details)")
+
+    env = conf.Finish()
+
+# dep: opus
+if 'opus' in autobuild_dependencies:
+    env.BuildThirdParty(thirdparty_versions, 'opus')
+
+elif 'opus' in system_dependencies:
+    conf = Configure(env, custom_tests=env.CustomTests)
+
+    if not conf.AddPkgConfigDependency('opus', '--cflags --libs'):
+        conf.env.AddManualDependency(libs=['opus'])
+
+    if not conf.CheckLibWithHeaderExt('opus', 'opus/opus.h', 'C',
+                                      run=not is_crosscompiling):
+        env.Die("opus not found (see 'config.log' for details)")
 
     env = conf.Finish()
 

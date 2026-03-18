@@ -1201,6 +1201,30 @@ elif ctx.pkg_name == 'openssl':
     install_tree(ctx, 'include', ctx.pkg_inc_dir)
     install_files(ctx, 'libssl.a', ctx.pkg_lib_dir)
     install_files(ctx, 'libcrypto.a', ctx.pkg_lib_dir)
+elif ctx.pkg_name == 'opus':
+    download(
+        ctx,
+        'https://downloads.xiph.org/releases/opus/opus-{ctx.pkg_ver}.tar.gz',
+        'opus-{ctx.pkg_ver}.tar.gz')
+    unpack(
+        ctx,
+        'opus-{ctx.pkg_ver}.tar.gz',
+        'opus-{ctx.pkg_ver}')
+    changedir(ctx, 'src/opus-{ctx.pkg_ver}')
+    execute(ctx, './configure --host={host} {vars} {flags} {opts}'.format(
+        host=ctx.toolchain,
+        vars=format_vars(ctx),
+        flags=format_flags(ctx, cflags='-fPIC'),
+        opts=' '.join([
+            '--disable-doc',
+            '--disable-extra-programs',
+            '--disable-shared',
+            '--enable-static',
+        ])))
+    execute_make(ctx)
+    install_tree(ctx, 'include/opus', os.path.join(ctx.pkg_inc_dir, 'opus'),
+                 include=['*.h'])
+    install_files(ctx, '.libs/libopus.a', ctx.pkg_lib_dir)
 elif ctx.pkg_name == 'speexdsp':
     if ctx.pkg_ver.split('.', 1) > ['1', '2'] and (
             not re.match('^1.2[a-z]', ctx.pkg_ver) or ctx.pkg_ver == '1.2rc3'):

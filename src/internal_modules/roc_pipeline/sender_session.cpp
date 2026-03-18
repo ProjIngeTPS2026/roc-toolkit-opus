@@ -25,6 +25,7 @@ SenderSession::SenderSession(const SenderSinkConfig& sink_config,
     , encoding_map_(encoding_map)
     , packet_factory_(packet_factory)
     , frame_factory_(frame_factory)
+    , packetizer_(NULL)
     , frame_writer_(NULL)
     , valid_(false) {
     identity_.reset(new (identity_) rtp::Identity());
@@ -109,12 +110,6 @@ bool SenderSession::create_transport_pipeline(SenderEndpoint* source_endpoint,
     }
     pkt_writer = timestamp_extractor_.get();
 
-    payload_encoder_.reset(pkt_encoding->new_encoder(arena_, pkt_encoding->sample_spec),
-                           arena_);
-    if (!payload_encoder_) {
-        return false;
-    }
-
     sequencer_.reset(new (sequencer_)
                          rtp::Sequencer(*identity_, sink_config_.payload_type));
     if (!sequencer_ || !sequencer_->is_valid()) {
@@ -131,13 +126,44 @@ bool SenderSession::create_transport_pipeline(SenderEndpoint* source_endpoint,
                                         audio::Sample_RawFormat,
                                         pkt_encoding->sample_spec.channel_set());
 
-        packetizer_.reset(new (packetizer_) audio::Packetizer(
-            *pkt_writer, source_endpoint->outbound_composer(), *sequencer_,
-            *payload_encoder_, packet_factory_, sink_config_.packet_length, in_spec));
-        if (!packetizer_ || !packetizer_->is_valid()) {
+        if (pkt_encoding->sample_spec.sample_format() == audio::SampleFormat_Opus) {
+#ifdef ROC_TARGET_OPUS
+            opus_payload_encoder_.reset(new (opus_payload_encoder_) audio::OpusEncoder(
+                arena_, pkt_encoding->sample_spec, sink_config_.opus));
+            if (!opus_payload_encoder_ || !opus_payload_encoder_->is_valid()) {
+                return false;
+            }
+
+            opus_packetizer_.reset(new (opus_packetizer_) audio::OpusPacketizer(
+                *pkt_writer, source_endpoint->outbound_composer(), *sequencer_,
+                *opus_payload_encoder_, packet_factory_, sink_config_.packet_length,
+                in_spec, arena_));
+            if (!opus_packetizer_ || !opus_packetizer_->is_valid()) {
+                return false;
+            }
+
+            packetizer_ = opus_packetizer_.get();
+#else
             return false;
+#endif
+        } else {
+            payload_encoder_.reset(
+                pkt_encoding->new_encoder(arena_, pkt_encoding->sample_spec), arena_);
+            if (!payload_encoder_) {
+                return false;
+            }
+
+            pcm_packetizer_.reset(new (pcm_packetizer_) audio::Packetizer(
+                *pkt_writer, source_endpoint->outbound_composer(), *sequencer_,
+                *payload_encoder_, packet_factory_, sink_config_.packet_length, in_spec));
+            if (!pcm_packetizer_ || !pcm_packetizer_->is_valid()) {
+                return false;
+            }
+
+            packetizer_ = pcm_packetizer_.get();
         }
-        frm_writer = packetizer_.get();
+
+        frm_writer = packetizer_;
     }
 
     if (pkt_encoding->sample_spec.channel_set()

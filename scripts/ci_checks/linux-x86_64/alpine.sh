@@ -7,5 +7,5 @@ scons -Q \
       --enable-tests \
       --enable-benchmarks \
       --enable-examples \
-      --build-3rdparty=openfec,google-benchmark \
+      --build-3rdparty=openfec,opus,google-benchmark \
       test

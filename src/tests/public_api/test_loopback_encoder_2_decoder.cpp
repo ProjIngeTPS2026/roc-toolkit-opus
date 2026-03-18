@@ -28,6 +28,7 @@ namespace {
 enum {
     NoFlags = 0,
     FlagLosses = (1 << 0),
+    FlagLossy = (1 << 1),
 };
 
 } // namespace
@@ -196,21 +197,23 @@ TEST_GROUP(loopback_encoder_2_decoder) {
                     if (leading_zeros) {
                         zero_samples++;
                     } else {
-                        if (!is_zero(recv_value - samples[ns])) {
-                            char sbuff[256];
-                            snprintf(sbuff, sizeof(sbuff),
-                                     "failed comparing samples:\n\n"
-                                     "frame_num: %lu, frame_off: %lu\n"
-                                     "zero_samples: %lu, total_samples: %lu\n"
-                                     "expected: %f, received: %f\n",
-                                     (unsigned long)nf, (unsigned long)ns,
-                                     (unsigned long)zero_samples,
-                                     (unsigned long)total_samples, (double)recv_value,
-                                     (double)samples[ns]);
-                            FAIL(sbuff);
+                        if (!(flags & FlagLossy)) {
+                            if (!is_zero(recv_value - samples[ns])) {
+                                char sbuff[256];
+                                snprintf(sbuff, sizeof(sbuff),
+                                         "failed comparing samples:\n\n"
+                                         "frame_num: %lu, frame_off: %lu\n"
+                                         "zero_samples: %lu, total_samples: %lu\n"
+                                         "expected: %f, received: %f\n",
+                                         (unsigned long)nf, (unsigned long)ns,
+                                         (unsigned long)zero_samples,
+                                         (unsigned long)total_samples, (double)recv_value,
+                                         (double)samples[ns]);
+                                FAIL(sbuff);
+                            }
+                            recv_value =
+                                test::increment_sample_value(recv_value, sample_step);
                         }
-                        recv_value =
-                            test::increment_sample_value(recv_value, sample_step);
                     }
                 }
             }
@@ -346,6 +349,51 @@ TEST(loopback_encoder_2_decoder, source_control) {
     LONGS_EQUAL(0, roc_sender_encoder_close(encoder));
     LONGS_EQUAL(0, roc_receiver_decoder_close(decoder));
 }
+
+#ifdef ROC_TARGET_OPUS
+TEST(loopback_encoder_2_decoder, source_control_opus) {
+    enum { Flags = FlagLossy };
+
+    sender_conf.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+    sender_conf.packet_length = 20000000ull;
+    sender_conf.fec_encoding = ROC_FEC_ENCODING_DISABLE;
+
+    receiver_conf.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+
+    roc_sender_encoder* encoder = NULL;
+    CHECK(roc_sender_encoder_open(context, &sender_conf, &encoder) == 0);
+    CHECK(encoder);
+
+    roc_receiver_decoder* decoder = NULL;
+    CHECK(roc_receiver_decoder_open(context, &receiver_conf, &decoder) == 0);
+    CHECK(decoder);
+
+    CHECK(roc_sender_encoder_activate(encoder, ROC_INTERFACE_AUDIO_SOURCE, ROC_PROTO_RTP)
+          == 0);
+
+    CHECK(
+        roc_sender_encoder_activate(encoder, ROC_INTERFACE_AUDIO_CONTROL, ROC_PROTO_RTCP)
+        == 0);
+
+    CHECK(
+        roc_receiver_decoder_activate(decoder, ROC_INTERFACE_AUDIO_SOURCE, ROC_PROTO_RTP)
+        == 0);
+
+    CHECK(roc_receiver_decoder_activate(decoder, ROC_INTERFACE_AUDIO_CONTROL,
+                                        ROC_PROTO_RTCP)
+          == 0);
+
+    roc_interface ifaces[] = {
+        ROC_INTERFACE_AUDIO_SOURCE,
+        ROC_INTERFACE_AUDIO_CONTROL,
+    };
+
+    run_test(encoder, decoder, ifaces, ROC_ARRAY_SIZE(ifaces), Flags);
+
+    LONGS_EQUAL(0, roc_sender_encoder_close(encoder));
+    LONGS_EQUAL(0, roc_receiver_decoder_close(decoder));
+}
+#endif
 
 TEST(loopback_encoder_2_decoder, source_repair) {
     if (!is_rs8m_supported()) {

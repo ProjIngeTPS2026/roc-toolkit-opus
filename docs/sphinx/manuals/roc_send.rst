@@ -17,7 +17,7 @@ Options
 -h, --help                  Print help and exit
 -V, --version               Print version and exit
 -v, --verbose               Increase verbosity level (may be used multiple times)
--L, --list-supported        list supported schemes and formats
+-L, --list-supported        list supported schemes, packet encodings, and formats
 -i, --input=IO_URI          Input file or device URI
 --input-format=FILE_FORMAT  Force input file format
 -s, --source=ENDPOINT_URI   Remote source endpoint
@@ -25,11 +25,19 @@ Options
 -c, --control=ENDPOINT_URI  Remote control endpoint
 --reuseaddr                 enable SO_REUSEADDR when binding sockets
 --target-latency=STRING     Target latency, TIME units
+--packet-encoding=STRING    Outgoing packet encoding
 --io-latency=STRING         Recording target latency, TIME units
 --latency-tolerance=STRING  Maximum deviation from target latency, TIME units
 --nbsrc=INT                 Number of source packets in FEC block
 --nbrpr=INT                 Number of repair packets in FEC block
 --packet-len=STRING         Outgoing packet length, TIME units
+--opus-bitrate=INT          Opus bitrate, bits per second
+--opus-complexity=INT       Opus complexity in range [0; 10]
+--opus-application=STRING   Opus application mode
+--opus-vbr=STRING           Opus VBR mode
+--opus-fec                  Enable Opus in-band FEC  (default=off)
+--opus-dtx                  Enable Opus DTX  (default=off)
+--opus-loss-pct=INT         Expected packet loss percentage for Opus
 --frame-len=TIME            Duration of the internal frames, TIME units
 --max-packet-size=SIZE      Maximum packet size, in SIZE units
 --max-frame-size=SIZE       Maximum internal frame size, in SIZE units
@@ -81,6 +89,16 @@ Supported control protocols:
 
 - ``rtcp://``
 
+Packet encoding
+---------------
+
+Use ``--packet-encoding`` to choose network packet encoding explicitly. Supported
+values are ``l16-mono``, ``l16-stereo``, ``opus-mono``, and ``opus-stereo``.
+
+When Opus is selected, sender uses RTP payload type 112 for mono or 113 for stereo.
+Default Opus packet length is 20 ms, and ``--packet-len`` should be one of 2.5, 5, 10,
+20, 40, or 60 ms.
+
 IO URI
 ------
 
@@ -106,7 +124,7 @@ Examples:
 - ``file:./test.wav``
 - ``file:-``
 
-The list of supported schemes and file formats can be retrieved using ``--list-supported`` option.
+The list of supported schemes, packet encodings, and file formats can be retrieved using ``--list-supported`` option.
 
 If the ``--input`` is omitted, the default driver and device are selected.
 
@@ -157,6 +175,13 @@ Send file to receiver with one bare RTP endpoint:
 .. code::
 
     $ roc-send -vv -i file:./input.wav -s rtp://192.168.0.3:10001
+
+Send file to receiver using Opus compression:
+
+.. code::
+
+    $ roc-send -vv -i file:./input.wav -s rtp://192.168.0.3:10001 \
+        --packet-encoding=opus-stereo --packet-len=20ms --opus-bitrate=64000
 
 Send file to receiver with IPv4 source, repair, and control endpoints:
 

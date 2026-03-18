@@ -1,0 +1,38 @@
+14:10:45.600 [54246] [dbg] roc_sndio: [sndfile_backend.cpp:20] sndfile backend: initializing
+14:10:45.616 [54246] [dbg] roc_sndio: [backend_map.cpp:22] backend map: initializing: n_backends=4 n_drivers=109
+14:10:45.617 [54246] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (packet_pool): initializing: slot_size=720 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:10:45.618 [54246] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (packet_buffer_pool): initializing: slot_size=11632 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:10:45.619 [54246] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (frame_buffer_pool): initializing: slot_size=4144 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:10:45.625 [54246] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (encoding_pool): initializing: slot_size=288 prealloc_size=4608(16 slots) min_slab=4608(16 slots) max_slab=0(0 slots)
+14:10:45.627 [54248] [dbg] roc_netio: [network_loop.cpp:277] network loop: starting event loop
+14:10:45.628 [54246] [dbg] roc_node: [context.cpp:26] context: initializing
+14:10:45.628 [54246] [dbg] roc_sndio: [sndfile_source.cpp:48] sndfile source: opening: driver=(null) path=./speech_orig.wav
+14:10:45.629 [54249] [dbg] roc_ctl: [control_task_queue.cpp:95] control task queue: starting event loop
+14:10:45.633 [54246] [inf] roc_sndio: [sndfile_source.cpp:204] sndfile source: opened: <sspec rate=48000 fmt=<pcm f32> chset=<surround smpte n_ch=1 ch=FC>>
+14:10:45.634 [54246] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (slot_pool): initializing: slot_size=1152 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:10:45.635 [54246] [dbg] roc_node: [sender.cpp:32] sender node: initializing
+14:10:45.635 [54246] [dbg] roc_node: [sender.cpp:72] sender node: configuring audiosrc interface of slot 0
+14:10:45.636 [54246] [inf] roc_pipeline: [sender_sink.cpp:71] sender sink: adding slot
+14:10:45.636 [54246] [dbg] roc_rtp: [identity.cpp:50] rtp identity: ssrc=3400635650 cname=57ba3681-efa5-49aa-80f5-27fb6e5b0f12
+14:10:45.637 [54246] [inf] roc_node: [sender.cpp:119] sender node: connecting audiosrc interface of slot 0 to rtp://127.0.0.1:10021
+14:10:45.639 [54248] [dbg] roc_netio: [udp_port.cpp:127] udp port: <udp 0x7F323C000B88 bind=0.0.0.0:39486>: opened port
+14:10:45.639 [54246] [inf] roc_node: [sender.cpp:199] sender node: bound audiosrc interface to 0.0.0.0:39486
+14:10:45.640 [54248] [dbg] roc_netio: [network_loop.cpp:425] network loop: starting sending packets on port <udp 0x7F323C000B88 bind=0.0.0.0:39486>
+14:10:45.641 [54246] [dbg] roc_pipeline: [sender_slot.cpp:55] sender slot: adding audiosrc endpoint rtp
+14:10:45.644 [54246] [dbg] roc_audio: [latency_tuner.cpp:167] latency tuner: initializing: target_latency=0(0.000ms) latency_tolerance=0(0.000ms) stale_tolerance=0(0.000ms) scaling_interval=0(0.000ms) scaling_tolerance=0.000000 backend=niq profile=intact
+14:10:45.644 [54246] [dbg] roc_sndio: [pump.cpp:57] pump: starting main loop
+14:10:45.645 [54246] [dbg] roc_pipeline: [pipeline_loop.cpp:472] pipeline loop: tasks=3 in_place=1.00 in_frame=0.00 preempts=0 sched=0/0
+14:10:45.656 [54246] [dbg] roc_packet: [router.cpp:105] router: detected new stream: source_id=3400635650 route_flags=[audio] packet_flags=[rtp,audio,prepared]
+14:10:45.657 [54246] [dbg] roc_netio: [udp_port.cpp:575] udp port: <udp 0x7F323C000B88 bind=0.0.0.0:39486>: recv=0 send=1 send_nb=1
+14:10:56.436 [54246] [dbg] roc_sndio: [pump.cpp:94] pump: got eof from source
+14:10:56.437 [54246] [dbg] roc_sndio: [pump.cpp:109] pump: exiting main loop, wrote 1080 buffers from main source
+14:10:56.437 [54246] [dbg] roc_node: [sender.cpp:45] sender node: deinitializing
+14:10:56.438 [54246] [inf] roc_pipeline: [sender_sink.cpp:90] sender sink: removing slot
+14:10:56.438 [54248] [dbg] roc_netio: [network_loop.cpp:555] network loop: removing port <udp 0x7F323C000B88 bind=0.0.0.0:39486>
+14:10:56.439 [54248] [dbg] roc_netio: [udp_port.cpp:499] udp port: <udp 0x7F323C000B88 bind=0.0.0.0:39486>: initiating asynchronous close
+14:10:56.440 [54248] [dbg] roc_netio: [udp_port.cpp:211] udp port: <udp 0x7F323C000B88 bind=0.0.0.0:39486>: closed port
+14:10:56.440 [54248] [dbg] roc_netio: [network_loop.cpp:262] network loop: asynchronous close finished: port <udp 0x7F323C000B88 bind=0.0.0.0:39486>
+14:10:56.441 [54246] [inf] roc_sndio: [sndfile_source.cpp:215] sndfile source: closing input
+14:10:56.442 [54246] [dbg] roc_node: [context.cpp:30] context: deinitializing
+14:10:56.442 [54249] [dbg] roc_ctl: [control_task_queue.cpp:105] control task queue: finishing event loop
+14:10:56.443 [54248] [dbg] roc_netio: [network_loop.cpp:284] network loop: finishing event loop

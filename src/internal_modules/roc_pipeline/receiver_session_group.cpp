@@ -345,6 +345,15 @@ bool ReceiverSessionGroup::can_create_session_(const packet::PacketPtr& packet) 
         return false;
     }
 
+    if (source_config_.session_defaults.payload_type != 0 && packet->rtp()
+        && packet->rtp()->payload_type != source_config_.session_defaults.payload_type) {
+        roc_log(LogDebug,
+                "session group: ignoring packet with unexpected payload type:"
+                " got=%u expected=%u",
+                packet->rtp()->payload_type, source_config_.session_defaults.payload_type);
+        return false;
+    }
+
     return true;
 }
 
@@ -435,7 +444,7 @@ ReceiverSessionGroup::make_session_config_(const packet::PacketPtr& packet) cons
     ReceiverSessionConfig config = source_config_.session_defaults;
 
     packet::RTP* rtp = packet->rtp();
-    if (rtp) {
+    if (rtp && config.payload_type == 0) {
         config.payload_type = rtp->payload_type;
     }
 

@@ -53,6 +53,11 @@ public:
     //!  payload type already exists.
     ROC_ATTR_NODISCARD bool add_encoding(Encoding enc);
 
+    //! Add a known built-in encoding on demand.
+    //! @returns
+    //!  true if successfully added or already present with identical parameters.
+    ROC_ATTR_NODISCARD bool add_builtin_encoding(unsigned int payload_type);
+
 private:
     enum { PreallocatedNodes = 16 };
 
@@ -78,6 +83,8 @@ private:
     };
 
     void add_builtin_(const Encoding& enc);
+    bool add_encoding_(const Encoding& enc);
+    bool make_builtin_(unsigned int payload_type, Encoding& enc) const;
     void find_codecs_(Encoding& enc);
 
     core::Mutex mutex_;

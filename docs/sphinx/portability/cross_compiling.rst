@@ -289,7 +289,7 @@ To build Roc for Android using a prebuilt toolchain from Android NDK, you can us
             --disable-tools \
             --compiler=clang \
             --host=aarch64-linux-android28 \
-            --build-3rdparty=libuv,openfec,speexdsp
+            --build-3rdparty=libuv,openfec,opus,speexdsp
 
 Alternatively, you can install Android NDK manually and run:
 
@@ -310,7 +310,7 @@ Alternatively, you can install Android NDK manually and run:
         --disable-tools \
         --compiler=clang \
         --host=aarch64-linux-android28 \
-        --build-3rdparty=libuv,openfec,speexdsp
+        --build-3rdparty=libuv,openfec,opus,speexdsp
 
 Supported ``--host`` values are:
 

@@ -156,6 +156,8 @@ typedef enum roc_protocol {
      * Audio encodings:
      *   - \ref ROC_PACKET_ENCODING_AVP_L16_MONO
      *   - \ref ROC_PACKET_ENCODING_AVP_L16_STEREO
+     *   - \ref ROC_PACKET_ENCODING_OPUS_MONO
+     *   - \ref ROC_PACKET_ENCODING_OPUS_STEREO
      *   - encodings registered using roc_context_register_encoding()
      *
      * FEC encodings:
@@ -262,7 +264,47 @@ typedef enum roc_packet_encoding {
      *  - \ref ROC_PROTO_RTP_LDPC_SOURCE
      */
     ROC_PACKET_ENCODING_AVP_L16_STEREO = 10,
+
+    /** Opus, 1 channel, 48000 rate.
+     *
+     * Represents Roc built-in Opus network encoding. Uses Opus-compressed payload
+     * carried over RTP with fixed 48 kHz RTP clock.
+     *
+     * Supported by protocols:
+     *  - \ref ROC_PROTO_RTP
+     *  - \ref ROC_PROTO_RTP_RS8M_SOURCE
+     *  - \ref ROC_PROTO_RTP_LDPC_SOURCE
+     */
+    ROC_PACKET_ENCODING_OPUS_MONO = 112,
+
+    /** Opus, 2 channels, 48000 rate.
+     *
+     * Represents Roc built-in Opus network encoding. Uses Opus-compressed payload
+     * carried over RTP with fixed 48 kHz RTP clock.
+     *
+     * Supported by protocols:
+     *  - \ref ROC_PROTO_RTP
+     *  - \ref ROC_PROTO_RTP_RS8M_SOURCE
+     *  - \ref ROC_PROTO_RTP_LDPC_SOURCE
+     */
+    ROC_PACKET_ENCODING_OPUS_STEREO = 113,
 } roc_packet_encoding;
+
+/** Opus encoder application mode. */
+typedef enum roc_opus_application {
+    ROC_OPUS_APPLICATION_DEFAULT = 0,
+    ROC_OPUS_APPLICATION_AUDIO = 1,
+    ROC_OPUS_APPLICATION_VOIP = 2,
+    ROC_OPUS_APPLICATION_LOWDELAY = 3
+} roc_opus_application;
+
+/** Opus variable bitrate mode. */
+typedef enum roc_opus_vbr_mode {
+    ROC_OPUS_VBR_DEFAULT = 0,
+    ROC_OPUS_VBR_OFF = 1,
+    ROC_OPUS_VBR_ON = 2,
+    ROC_OPUS_VBR_CONSTRAINED = 3
+} roc_opus_vbr_mode;
 
 /** Forward Error Correction encoding.
  * Each FEC encoding is compatible with specific protocols.
@@ -793,6 +835,49 @@ typedef struct roc_sender_config {
      * If zero, default value is used (if latency tuning is enabled on sender).
      */
     unsigned long long latency_tolerance;
+
+    /** Opus target bitrate in bits per second.
+     *
+     * Used only when packet encoding is Opus. If zero, default value is selected
+     * automatically according to channel count.
+     */
+    int opus_bitrate;
+
+    /** Opus encoder complexity in range [0; 10].
+     *
+     * Used only when packet encoding is Opus. If zero, default value is used.
+     */
+    unsigned int opus_complexity;
+
+    /** Opus encoder application mode.
+     *
+     * Used only when packet encoding is Opus. If zero, default value is used.
+     */
+    roc_opus_application opus_application;
+
+    /** Opus variable bitrate mode.
+     *
+     * Used only when packet encoding is Opus. If zero, default value is used.
+     */
+    roc_opus_vbr_mode opus_vbr_mode;
+
+    /** Enable Opus in-band FEC.
+     *
+     * Used only when packet encoding is Opus.
+     */
+    unsigned int opus_inband_fec;
+
+    /** Enable Opus DTX.
+     *
+     * Used only when packet encoding is Opus.
+     */
+    unsigned int opus_dtx;
+
+    /** Expected packet loss percentage in range [0; 100].
+     *
+     * Used only when packet encoding is Opus.
+     */
+    unsigned int opus_expected_loss_percent;
 } roc_sender_config;
 
 /** Receiver configuration.
@@ -910,6 +995,14 @@ typedef struct roc_receiver_config {
      * If zero, default value is used. If negative, the check is disabled.
      */
     long long choppy_playback_timeout;
+
+    /** Expected packet encoding.
+     *
+     * If zero, receiver keeps legacy behavior and auto-creates sessions for any
+     * known payload type. If non-zero, receiver pre-registers and accepts only the
+     * specified built-in packet encoding.
+     */
+    roc_packet_encoding packet_encoding;
 } roc_receiver_config;
 
 /** Interface configuration.

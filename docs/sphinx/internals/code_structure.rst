@@ -129,6 +129,7 @@ target_libunwind      Enabled if libunwind is available
 target_libatomic_ops  Enabled if libatomic_ops is available
 target_libuv          Enabled if libuv is available
 target_openfec        Enabled if OpenFEC is available
+target_opus           Enabled if Opus is available
 target_speexdsp       Enabled if SpeexDSP is available
 target_sox            Enabled if SoX is available
 target_sndfile        Enabled if libsndfile is available

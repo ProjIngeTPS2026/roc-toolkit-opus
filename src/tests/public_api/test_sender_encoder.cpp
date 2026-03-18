@@ -50,6 +50,40 @@ TEST(sender_encoder, open_close) {
     LONGS_EQUAL(0, roc_sender_encoder_close(encoder));
 }
 
+TEST(sender_encoder, open_close_opus) {
+    sender_config.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+    sender_config.packet_length = 20000000ull;
+
+    roc_sender_encoder* encoder = NULL;
+#ifdef ROC_TARGET_OPUS
+    CHECK(roc_sender_encoder_open(context, &sender_config, &encoder) == 0);
+    CHECK(encoder);
+    LONGS_EQUAL(0, roc_sender_encoder_close(encoder));
+#else
+    CHECK(roc_sender_encoder_open(context, &sender_config, &encoder) == -1);
+    CHECK(!encoder);
+#endif
+}
+
+TEST(sender_encoder, open_error_opus_bad_packet_length) {
+    sender_config.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+    sender_config.packet_length = 7000000ull;
+
+    roc_sender_encoder* encoder = NULL;
+    CHECK(roc_sender_encoder_open(context, &sender_config, &encoder) == -1);
+    CHECK(!encoder);
+}
+
+TEST(sender_encoder, open_error_opus_bad_complexity) {
+    sender_config.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+    sender_config.packet_length = 20000000ull;
+    sender_config.opus_complexity = 11;
+
+    roc_sender_encoder* encoder = NULL;
+    CHECK(roc_sender_encoder_open(context, &sender_config, &encoder) == -1);
+    CHECK(!encoder);
+}
+
 TEST(sender_encoder, activate) {
     roc_sender_encoder* encoder = NULL;
     CHECK(roc_sender_encoder_open(context, &sender_config, &encoder) == 0);

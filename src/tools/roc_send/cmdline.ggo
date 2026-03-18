@@ -23,6 +23,9 @@ section "Options"
     option "target-latency" - "Target latency, TIME units"
         string optional
 
+    option "packet-encoding" - "Outgoing packet encoding"
+        typestr="PACKET_ENCODING" string optional
+
     option "io-latency" - "Recording target latency, TIME units"
         string optional
 
@@ -37,6 +40,25 @@ section "Options"
 
     option "packet-len" - "Outgoing packet length, TIME units"
         string optional
+
+    option "opus-bitrate" - "Opus bitrate, bits per second"
+        int optional
+
+    option "opus-complexity" - "Opus complexity in range [0; 10]"
+        int optional
+
+    option "opus-application" - "Opus application mode"
+        typestr="OPUS_APPLICATION" string optional
+
+    option "opus-vbr" - "Opus VBR mode"
+        typestr="OPUS_VBR" string optional
+
+    option "opus-fec" - "Enable Opus in-band FEC" flag off
+
+    option "opus-dtx" - "Enable Opus DTX" flag off
+
+    option "opus-loss-pct" - "Expected packet loss percentage for Opus"
+        int optional
 
     option "frame-len" - "Duration of the internal frames, TIME units"
         typestr="TIME" string optional
@@ -86,8 +108,17 @@ TIME is an integer or floating-point number with a suffix, e.g.:
 SIZE is an integer or floating-point number with an optional suffix, e.g.:
   123; 1.23K; 1.23M; 1.23G;
 
+PACKET_ENCODING is one of:
+  l16-mono; l16-stereo; opus-mono; opus-stereo
+
+OPUS_APPLICATION is one of:
+  audio; voip; lowdelay
+
+OPUS_VBR is one of:
+  off; on; constrained
+
 Use --list-supported option to print the list of the supported
-URI schemes and file formats.
+URI schemes, packet encodings, and file formats.
 
 See further details in roc-send(1) manual page locally or online:
 https://roc-streaming.org/toolkit/docs/manuals/roc_send.html"

@@ -48,6 +48,28 @@ TEST(receiver, open_close) {
     LONGS_EQUAL(0, roc_receiver_close(receiver));
 }
 
+TEST(receiver, open_close_opus) {
+    receiver_config.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+
+    roc_receiver* receiver = NULL;
+#ifdef ROC_TARGET_OPUS
+    CHECK(roc_receiver_open(context, &receiver_config, &receiver) == 0);
+    CHECK(receiver);
+    LONGS_EQUAL(0, roc_receiver_close(receiver));
+#else
+    CHECK(roc_receiver_open(context, &receiver_config, &receiver) == -1);
+    CHECK(!receiver);
+#endif
+}
+
+TEST(receiver, open_error_bad_packet_encoding) {
+    receiver_config.packet_encoding = (roc_packet_encoding)99999;
+
+    roc_receiver* receiver = NULL;
+    CHECK(roc_receiver_open(context, &receiver_config, &receiver) == -1);
+    CHECK(!receiver);
+}
+
 TEST(receiver, bind) {
     roc_receiver* receiver = NULL;
     CHECK(roc_receiver_open(context, &receiver_config, &receiver) == 0);

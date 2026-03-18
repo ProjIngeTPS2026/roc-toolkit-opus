@@ -10,6 +10,7 @@
 #include <CppUTest/UtestMacros.h>
 
 #include "roc_audio/channel_defs.h"
+#include "roc_audio/opus_config.h"
 #include "roc_audio/pcm_format.h"
 #include "roc_audio/sample.h"
 #include "roc_audio/sample_format.h"
@@ -593,6 +594,65 @@ TEST(sample_spec, parse_defaults) {
         CHECK_EQUAL(ChanOrder_None, sample_spec.channel_set().order());
         CHECK_EQUAL(0, sample_spec.channel_set().num_channels());
     }
+}
+
+TEST(sample_spec, parse_opus) {
+    {
+        SampleSpec sample_spec;
+        CHECK(parse_sample_spec("opus/48000/mono", sample_spec));
+
+        CHECK(sample_spec.is_valid());
+        CHECK_EQUAL(48000, sample_spec.sample_rate());
+        CHECK_EQUAL(SampleFormat_Opus, sample_spec.sample_format());
+        CHECK_EQUAL(PcmFormat_Invalid, sample_spec.pcm_format());
+        CHECK_EQUAL(ChanLayout_Surround, sample_spec.channel_set().layout());
+        CHECK_EQUAL(ChanOrder_Smpte, sample_spec.channel_set().order());
+        CHECK(sample_spec.channel_set().is_equal(ChanMask_Surround_Mono));
+    }
+
+    {
+        SampleSpec sample_spec;
+        CHECK(parse_sample_spec("opus/48000/stereo", sample_spec));
+
+        CHECK(sample_spec.is_valid());
+        CHECK_EQUAL(48000, sample_spec.sample_rate());
+        CHECK_EQUAL(SampleFormat_Opus, sample_spec.sample_format());
+        CHECK_EQUAL(PcmFormat_Invalid, sample_spec.pcm_format());
+        CHECK_EQUAL(ChanLayout_Surround, sample_spec.channel_set().layout());
+        CHECK_EQUAL(ChanOrder_Smpte, sample_spec.channel_set().order());
+        CHECK(sample_spec.channel_set().is_equal(ChanMask_Surround_Stereo));
+    }
+}
+
+TEST(sample_spec, opus_clears_pcm_format) {
+    SampleSpec sample_spec;
+
+    sample_spec.set_sample_format(SampleFormat_Pcm);
+    sample_spec.set_pcm_format(PcmFormat_SInt16);
+    CHECK_EQUAL(PcmFormat_SInt16, sample_spec.pcm_format());
+
+    sample_spec.set_sample_format(SampleFormat_Opus);
+    CHECK_EQUAL(SampleFormat_Opus, sample_spec.sample_format());
+    CHECK_EQUAL(PcmFormat_Invalid, sample_spec.pcm_format());
+}
+
+TEST(sample_spec, opus_packet_lengths) {
+    CHECK(is_opus_packet_length(core::Second / 400));
+    CHECK(is_opus_packet_length(core::Second / 200));
+    CHECK(is_opus_packet_length(core::Second / 100));
+    CHECK(is_opus_packet_length(core::Second / 50));
+    CHECK(is_opus_packet_length(core::Second / 25));
+    CHECK(is_opus_packet_length(core::Second * 3 / 50));
+
+    CHECK(!is_opus_packet_length(0));
+    CHECK(!is_opus_packet_length(15 * core::Millisecond));
+
+    CHECK_EQUAL((size_t)120,
+                opus_packet_length_2_samples_per_chan(core::Second / 400));
+    CHECK_EQUAL((size_t)960,
+                opus_packet_length_2_samples_per_chan(OpusDefaultPacketLength));
+    CHECK_EQUAL((size_t)2880,
+                opus_packet_length_2_samples_per_chan(core::Second * 3 / 50));
 }
 
 TEST(sample_spec, parse_errors) {

@@ -64,7 +64,7 @@ class FeedbackMonitor : public IFrameWriter, public core::NonCopyable<> {
 public:
     //! Constructor.
     FeedbackMonitor(IFrameWriter& writer,
-                    Packetizer& packetizer,
+                    IPacketizer& packetizer,
                     ResamplerWriter* resampler,
                     const FeedbackConfig& feedback_config,
                     const LatencyConfig& latency_config,
@@ -116,7 +116,7 @@ private:
     core::nanoseconds_t last_feedback_ts_;
     const core::nanoseconds_t feedback_timeout_;
 
-    Packetizer& packetizer_;
+    IPacketizer& packetizer_;
     IFrameWriter& writer_;
 
     ResamplerWriter* resampler_;

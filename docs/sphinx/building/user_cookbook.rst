@@ -61,7 +61,7 @@ Ubuntu / Debian
 
     # for Roc
     $ sudo apt-get install g++ pkg-config scons ragel gengetopt libuv1-dev libunwind-dev \
-        libspeexdsp-dev libsox-dev libsndfile1-dev libssl-dev libpulse-dev
+        libopus-dev libspeexdsp-dev libsox-dev libsndfile1-dev libssl-dev libpulse-dev
 
     # for 3rd-parties
     $ sudo apt-get install libtool intltool autoconf automake make cmake meson
@@ -71,10 +71,10 @@ Ubuntu / Debian
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec
+    $ scons -Q --build-3rdparty=openfec,opus
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=openfec install
+    $ sudo scons -Q --build-3rdparty=openfec,opus install
 
 Fedora
 ------
@@ -83,7 +83,7 @@ Fedora
 
     # for Roc
     $ sudo dnf install gcc-c++ pkgconfig scons ragel gengetopt libuv-devel libunwind-devel \
-        speexdsp-devel sox-devel libsndfile-devel openssl-devel pulseaudio-libs-devel
+        opus-devel speexdsp-devel sox-devel libsndfile-devel openssl-devel pulseaudio-libs-devel
 
     # for 3rd-parties
     $ sudo dnf install libtool intltool autoconf automake make cmake
@@ -93,10 +93,10 @@ Fedora
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec
+    $ scons -Q --build-3rdparty=openfec,opus
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=openfec install
+    $ sudo scons -Q --build-3rdparty=openfec,opus install
 
 openSUSE
 --------
@@ -105,7 +105,7 @@ openSUSE
 
     # for Roc
     $ sudo zypper install gcc-c++ scons ragel gengetopt libuv-devel libunwind-devel \
-        speexdsp-devel sox-devel libsndfile-devel libopenssl-3-devel libpulse-devel
+        opus-devel speexdsp-devel sox-devel libsndfile-devel libopenssl-3-devel libpulse-devel
 
     # for 3rd-parties
     $ sudo zypper install pkg-config intltool libtool autoconf automake make cmake
@@ -115,10 +115,10 @@ openSUSE
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec
+    $ scons -Q --build-3rdparty=openfec,opus
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=openfec install
+    $ sudo scons -Q --build-3rdparty=openfec,opus install
 
 Centos
 ------
@@ -140,10 +140,10 @@ Centos
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=libuv,libatomic_ops,openfec
+    $ scons -Q --build-3rdparty=libuv,libatomic_ops,openfec,opus
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=libuv,libatomic_ops,openfec install
+    $ sudo scons -Q --build-3rdparty=libuv,libatomic_ops,openfec,opus install
 
 Arch Linux
 ----------
@@ -152,7 +152,7 @@ Arch Linux
 
     # for Roc
     $ sudo pacman -S gcc pkgconf scons ragel gengetopt libuv libunwind \
-        speexdsp sox libsndfile openssl gsm libpulse
+        opus speexdsp sox libsndfile openssl gsm libpulse
 
     # for 3rd-parties
     $ sudo pacman -S grep gawk libtool intltool autoconf automake make cmake
@@ -162,10 +162,10 @@ Arch Linux
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec
+    $ scons -Q --build-3rdparty=openfec,opus
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=openfec install
+    $ sudo scons -Q --build-3rdparty=openfec,opus install
 
 Alpine Linux
 ------------
@@ -174,7 +174,7 @@ Alpine Linux
 
     # for Roc
     $ sudo apk add g++ pkgconf scons ragel gengetopt libuv-dev libunwind-dev \
-        speexdsp-dev sox-dev libsndfile-dev openssl-dev pulseaudio-dev
+        opus-dev speexdsp-dev sox-dev libsndfile-dev openssl-dev pulseaudio-dev
 
     # for 3rd-parties
     $ sudo apk add libtool autoconf automake make cmake
@@ -184,10 +184,10 @@ Alpine Linux
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec
+    $ scons -Q --build-3rdparty=openfec,opus
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=openfec install
+    $ sudo scons -Q --build-3rdparty=openfec,opus install
 
 NixOS
 -----
@@ -202,7 +202,7 @@ NixOS
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec
+    $ scons -Q --build-3rdparty=openfec,opus
 
 Linux (cross-compile)
 =====================
@@ -370,7 +370,7 @@ Then you can run the following commands:
 .. code::
 
     # for Roc
-    $ brew install pkg-config scons ragel gengetopt libuv speexdsp sox libsndfile openssl@3
+    $ brew install pkg-config scons ragel gengetopt libuv opus speexdsp sox libsndfile openssl@3
 
     # for 3rd-parties
     $ brew install libtool autoconf automake make cmake
@@ -380,10 +380,10 @@ Then you can run the following commands:
     $ cd roc-toolkit
 
     # build libraries and tools
-    $ scons -Q --build-3rdparty=openfec PKG_CONFIG=`brew --prefix`/bin/pkg-config
+    $ scons -Q --build-3rdparty=openfec,opus PKG_CONFIG=`brew --prefix`/bin/pkg-config
 
     # install libraries and tools
-    $ sudo scons -Q --build-3rdparty=openfec PKG_CONFIG=`brew --prefix`/bin/pkg-config install
+    $ sudo scons -Q --build-3rdparty=openfec,opus PKG_CONFIG=`brew --prefix`/bin/pkg-config install
 
 Android
 =======

@@ -19,7 +19,7 @@ namespace audio {
 
 LatencyMonitor::LatencyMonitor(IFrameReader& frame_reader,
                                const packet::SortedQueue& incoming_queue,
-                               const Depacketizer& depacketizer,
+                               const IDepacketizer& depacketizer,
                                const packet::ILinkMeter& link_meter,
                                ResamplerReader* resampler,
                                const LatencyConfig& config,

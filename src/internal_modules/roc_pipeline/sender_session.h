@@ -40,6 +40,10 @@
 #include "roc_rtp/sequencer.h"
 #include "roc_rtp/timestamp_extractor.h"
 #include "roc_status/status_code.h"
+#ifdef ROC_TARGET_OPUS
+#include "roc_audio/opus_encoder.h"
+#include "roc_audio/opus_packetizer.h"
+#endif
 
 namespace roc {
 namespace pipeline {
@@ -145,7 +149,12 @@ private:
     core::Optional<rtp::TimestampExtractor> timestamp_extractor_;
 
     core::ScopedPtr<audio::IFrameEncoder> payload_encoder_;
-    core::Optional<audio::Packetizer> packetizer_;
+    core::Optional<audio::Packetizer> pcm_packetizer_;
+#ifdef ROC_TARGET_OPUS
+    core::Optional<audio::OpusEncoder> opus_payload_encoder_;
+    core::Optional<audio::OpusPacketizer> opus_packetizer_;
+#endif
+    audio::IPacketizer* packetizer_;
 
     core::Optional<audio::ChannelMapperWriter> channel_mapper_writer_;
 

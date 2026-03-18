@@ -32,6 +32,9 @@ section "Options"
     option "target-latency" - "Target latency, TIME units"
         string optional
 
+    option "packet-encoding" - "Expected packet encoding"
+        typestr="PACKET_ENCODING" string optional
+
     option "io-latency" - "Playback target latency, TIME units"
         string optional
 
@@ -95,8 +98,11 @@ TIME is an integer or floating-point number with a suffix, e.g.:
 SIZE is an integer or floating-point number with an optional suffix, e.g.:
   123; 1.23K; 1.23M; 1.23G;
 
+PACKET_ENCODING is one of:
+  l16-mono; l16-stereo; opus-mono; opus-stereo
+
 Use --list-supported option to print the list of the supported
-URI schemes and file formats.
+URI schemes, packet encodings, and file formats.
 
 See further details in roc-recv(1) manual page locally or online:
 https://roc-streaming.org/toolkit/docs/manuals/roc_recv.html"

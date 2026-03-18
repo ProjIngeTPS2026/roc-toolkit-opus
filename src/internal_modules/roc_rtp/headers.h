@@ -29,7 +29,9 @@ enum Version {
 //! RTP payload type.
 enum PayloadType {
     PayloadType_L16_Stereo = 10, //!< Audio, 16-bit PCM, 2 channels, 44100 Hz.
-    PayloadType_L16_Mono = 11    //!< Audio, 16-bit PCM, 1 channel, 44100 Hz.
+    PayloadType_L16_Mono = 11,   //!< Audio, 16-bit PCM, 1 channel, 44100 Hz.
+    PayloadType_Opus_Mono = 112, //!< Audio, Opus, 1 channel, 48000 Hz.
+    PayloadType_Opus_Stereo = 113 //!< Audio, Opus, 2 channels, 48000 Hz.
 };
 
 //! RTP header.

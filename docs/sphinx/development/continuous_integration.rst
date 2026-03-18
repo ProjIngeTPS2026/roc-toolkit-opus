@@ -155,7 +155,7 @@ Under the hood, this command will run scons in docker:
 
     $ docker run -t --rm --cap-add SYS_PTRACE -u "${UID}" -v "${PWD}:${PWD}" -w "${PWD}" \
         rocstreaming/env-fedora \
-          scons --build-3rdparty=openfec,cpputest --enable-debug test
+          scons --build-3rdparty=openfec,opus,cpputest --enable-debug test
 
 Explanation:
 

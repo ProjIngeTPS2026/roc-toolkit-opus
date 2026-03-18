@@ -9,6 +9,7 @@
 #include "roc_address/endpoint_uri.h"
 #include "roc_address/io_uri.h"
 #include "roc_address/print_supported.h"
+#include "roc_audio/print_supported.h"
 #include "roc_address/protocol_map.h"
 #include "roc_core/crash_handler.h"
 #include "roc_core/heap_arena.h"
@@ -21,6 +22,7 @@
 #include "roc_node/receiver.h"
 #include "roc_pipeline/receiver_source.h"
 #include "roc_pipeline/transcoder_source.h"
+#include "roc_rtp/headers.h"
 #include "roc_sndio/backend_dispatcher.h"
 #include "roc_sndio/backend_map.h"
 #include "roc_sndio/print_supported.h"
@@ -28,7 +30,38 @@
 
 #include "roc_recv/cmdline.h"
 
+#include <cstring>
+
 using namespace roc;
+
+namespace {
+
+bool parse_packet_encoding(const char* str, unsigned& payload_type) {
+    if (!str || strcmp(str, "l16-mono") == 0) {
+        payload_type = rtp::PayloadType_L16_Mono;
+        return true;
+    }
+    if (strcmp(str, "l16-stereo") == 0) {
+        payload_type = rtp::PayloadType_L16_Stereo;
+        return true;
+    }
+    if (strcmp(str, "opus-mono") == 0) {
+        payload_type = rtp::PayloadType_Opus_Mono;
+        return true;
+    }
+    if (strcmp(str, "opus-stereo") == 0) {
+        payload_type = rtp::PayloadType_Opus_Stereo;
+        return true;
+    }
+    return false;
+}
+
+bool is_opus_payload(unsigned payload_type) {
+    return payload_type == rtp::PayloadType_Opus_Mono
+        || payload_type == rtp::PayloadType_Opus_Stereo;
+}
+
+} // namespace
 
 int main(int argc, char** argv) {
     core::HeapArena::set_guards(core::HeapArena_DefaultGuards
@@ -112,6 +145,14 @@ int main(int argc, char** argv) {
         }
         if (receiver_config.session_defaults.latency.target_latency <= 0) {
             roc_log(LogError, "invalid --target-latency: should be > 0");
+            return 1;
+        }
+    }
+
+    if (args.packet_encoding_given) {
+        if (!parse_packet_encoding(args.packet_encoding_arg,
+                                   receiver_config.session_defaults.payload_type)) {
+            roc_log(LogError, "invalid --packet-encoding");
             return 1;
         }
     }
@@ -268,6 +309,10 @@ int main(int argc, char** argv) {
             return 1;
         }
 
+        if (!audio::print_supported()) {
+            return 1;
+        }
+
         if (!sndio::print_supported(backend_dispatcher, context.arena())) {
             return 1;
         }
@@ -319,6 +364,14 @@ int main(int argc, char** argv) {
                 "can't detect output encoding, try to set it "
                 "explicitly with --rate option");
         return 1;
+    }
+
+    if (is_opus_payload(receiver_config.session_defaults.payload_type)) {
+        if (!context.encoding_map().add_builtin_encoding(
+                receiver_config.session_defaults.payload_type)) {
+            roc_log(LogError, "can't enable requested Opus packet encoding");
+            return 1;
+        }
     }
 
     core::ScopedPtr<sndio::ISource> backup_source;

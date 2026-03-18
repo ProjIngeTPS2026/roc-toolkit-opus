@@ -57,6 +57,28 @@ TEST(receiver_decoder, open_close) {
     LONGS_EQUAL(0, roc_receiver_decoder_close(decoder));
 }
 
+TEST(receiver_decoder, open_close_opus) {
+    receiver_config.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+
+    roc_receiver_decoder* decoder = NULL;
+#ifdef ROC_TARGET_OPUS
+    CHECK(roc_receiver_decoder_open(context, &receiver_config, &decoder) == 0);
+    CHECK(decoder);
+    LONGS_EQUAL(0, roc_receiver_decoder_close(decoder));
+#else
+    CHECK(roc_receiver_decoder_open(context, &receiver_config, &decoder) == -1);
+    CHECK(!decoder);
+#endif
+}
+
+TEST(receiver_decoder, open_error_bad_packet_encoding) {
+    receiver_config.packet_encoding = (roc_packet_encoding)99999;
+
+    roc_receiver_decoder* decoder = NULL;
+    CHECK(roc_receiver_decoder_open(context, &receiver_config, &decoder) == -1);
+    CHECK(!decoder);
+}
+
 TEST(receiver_decoder, activate) {
     roc_receiver_decoder* decoder = NULL;
     CHECK(roc_receiver_decoder_open(context, &receiver_config, &decoder) == 0);

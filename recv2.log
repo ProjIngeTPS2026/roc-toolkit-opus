@@ -1,0 +1,71 @@
+14:02:13.480 [53773] [dbg] roc_sndio: [sndfile_backend.cpp:20] sndfile backend: initializing
+14:02:13.496 [53773] [dbg] roc_sndio: [backend_map.cpp:22] backend map: initializing: n_backends=4 n_drivers=109
+14:02:13.497 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (packet_pool): initializing: slot_size=720 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:02:13.498 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (packet_buffer_pool): initializing: slot_size=2096 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:02:13.498 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (frame_buffer_pool): initializing: slot_size=23088 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:02:13.499 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (encoding_pool): initializing: slot_size=288 prealloc_size=4608(16 slots) min_slab=4608(16 slots) max_slab=0(0 slots)
+14:02:13.501 [53776] [dbg] roc_netio: [network_loop.cpp:277] network loop: starting event loop
+14:02:13.502 [53773] [dbg] roc_node: [context.cpp:26] context: initializing
+14:02:13.503 [53773] [dbg] roc_sndio: [sndfile_sink.cpp:173] sndfile sink: opening: driver=(null) path=./output2.wav
+14:02:13.504 [53773] [dbg] roc_sndio: [sndfile_sink.cpp:122] detected file format type 'wav'
+14:02:13.505 [53777] [dbg] roc_ctl: [control_task_queue.cpp:95] control task queue: starting event loop
+14:02:13.508 [53773] [inf] roc_sndio: [sndfile_sink.cpp:281] sndfile sink: opened: <sspec rate=48000 fmt=<pcm f32> chset=<surround smpte n_ch=2 ch=FL,FR>>
+14:02:13.510 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (slot_pool): initializing: slot_size=632 prealloc_size=8(0 slots) min_slab=8(1 slots) max_slab=0(0 slots)
+14:02:13.511 [53773] [dbg] roc_node: [receiver.cpp:33] receiver node: initializing
+14:02:13.511 [53773] [dbg] roc_node: [receiver.cpp:73] receiver node: configuring audiosrc interface of slot 0
+14:02:13.511 [53773] [inf] roc_pipeline: [receiver_source.cpp:80] receiver source: adding slot
+14:02:13.512 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (route_pool): initializing: slot_size=552 prealloc_size=2208(4 slots) min_slab=2208(4 slots) max_slab=0(0 slots)
+14:02:13.513 [53773] [dbg] roc_core: [slab_pool_impl.cpp:63] slab pool (source_node_pool): initializing: slot_size=128 prealloc_size=1024(8 slots) min_slab=1024(8 slots) max_slab=0(0 slots)
+14:02:13.513 [53773] [dbg] roc_rtp: [identity.cpp:50] rtp identity: ssrc=3327415829 cname=3f79f9a9-e57a-44fc-afcd-a1e84375aea4
+14:02:13.514 [53773] [dbg] roc_pipeline: [receiver_slot.cpp:40] receiver slot: initializing
+14:02:13.514 [53773] [inf] roc_node: [receiver.cpp:120] receiver node: binding audiosrc interface of slot 0 to rtp://127.0.0.1:10011
+14:02:13.515 [53776] [dbg] roc_netio: [udp_port.cpp:127] udp port: <udp 0x7F3C0C000B88 bind=127.0.0.1:10011>: opened port
+14:02:13.516 [53773] [dbg] roc_pipeline: [receiver_slot.cpp:55] receiver slot: adding audiosrc endpoint rtp
+14:02:13.517 [53776] [dbg] roc_netio: [network_loop.cpp:445] network loop: starting receiving packets on port <udp 0x7F3C0C000B88 bind=127.0.0.1:10011>
+14:02:13.518 [53773] [dbg] roc_sndio: [pump.cpp:57] pump: starting main loop
+14:02:13.519 [53773] [dbg] roc_pipeline: [pipeline_loop.cpp:472] pipeline loop: tasks=2 in_place=1.00 in_frame=0.00 preempts=0 sched=0/0
+14:02:14.549 [53773] [inf] roc_pipeline: [receiver_session_group.cpp:383] session group: creating session: src_addr=127.0.0.1:51896 dst_addr=127.0.0.1:10011
+14:02:14.550 [53773] [dbg] roc_packet: [delayed_reader.cpp:32] delayed reader: initializing: delay=9600(200.000ms)
+14:02:14.551 [53773] [dbg] roc_audio: [watchdog.cpp:84] watchdog: initializing: max_blank_duration=12800(266.667ms) max_drops_duration=96000(2000.000ms) drop_detection_window=14400(300.000ms) warmup_duration=9600(200.000ms)
+14:02:14.551 [53773] [dbg] roc_audio: [speex_resampler.cpp:100] speex resampler: initializing: profile=medium quality=5 frame_size=80 channels_num=2
+14:02:14.552 [53773] [dbg] roc_audio: [latency_tuner.cpp:167] latency tuner: initializing: target_latency=9600(200.000ms) latency_tolerance=9600(200.000ms) stale_tolerance=2400(50.000ms) scaling_interval=240(5.000ms) scaling_tolerance=0.005000 backend=niq profile=gradual
+14:02:14.553 [53773] [dbg] roc_audio: [freq_estimator.cpp:73] freq estimator: initializing: P=1.000000e-06 I=5.000000e-09 dc1=10 dc2=10
+14:02:14.554 [53773] [dbg] roc_packet: [router.cpp:105] router: detected new stream: source_id=2659306953 route_flags=[audio] packet_flags=[udp,rtp,audio]
+14:02:14.554 [53773] [dbg] roc_pipeline: [receiver_session_router.cpp:127] session router: SSRC does not exist, creating new route: ssrc=2659306953 address=127.0.0.1:51896
+14:02:14.555 [53773] [dbg] roc_pipeline: [receiver_session_router.cpp:350] session router: creating route: ssrc=2659306953 cname="" address=127.0.0.1:51896 has_session=1
+14:02:14.555 [53773] [dbg] roc_audio: [speex_resampler.cpp:289] speex resampler: ratio=1/1 rates=48000/48000 latency=40 latency_diff=0
+14:02:14.556 [53773] [dbg] roc_audio: [opus_depacketizer.cpp:401] opus depacketizer: ts=40 loss_ratio=0.00000
+14:02:14.556 [53773] [dbg] roc_audio: [latency_tuner.cpp:419] latency tuner: e2e_latency=0(0.000ms) niq_latency=0(0.000ms) target_latency=9600(200.000ms) jitter=0(0.000ms) stale=0(0.000ms) fe=0.000000 eff_fe=0.000000
+14:02:14.560 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.579 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.589 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.609 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.629 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.639 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.659 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.679 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.689 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.709 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwwwwwwwwwwwwwwwwww
+14:02:14.719 [53773] [dbg] roc_packet: [delayed_reader.cpp:82] delayed reader: initial queue: delay=9600(200.000ms) queue=9600(200.000ms) packets=10
+14:02:14.720 [53773] [dbg] roc_audio: [opus_depacketizer.cpp:207] opus depacketizer: got first packet: zero_samples=8200
+14:02:14.729 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: wwwww...............
+14:02:16.729 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: .....bbbbbbbbbbbbbbb
+14:02:16.740 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.760 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.779 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.789 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.810 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.829 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.840 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.859 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.880 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.890 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.909 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.929 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.940 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.960 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.979 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbbbbbbbbbbbbbbbbb
+14:02:16.980 [53773] [dbg] roc_audio: [watchdog.cpp:179] watchdog: no_playback timeout reached: every frame was blank during timeout: max_blank_duration=12800(266.667ms) warmup_duration=9600(200.000ms)
+14:02:16.981 [53773] [dbg] roc_audio: [watchdog.cpp:295] watchdog: status: bbbbb
+14:02:16.981 [53773] [inf] roc_pipeline: [receiver_session_group.cpp:425] session group: removing session
+14:02:16.982 [53773] [dbg] roc_pipeline: [receiver_session_router.cpp:425] session router: removing route: n_ssrcs=1 cname="" address=127.0.0.1:51896 has_session=1

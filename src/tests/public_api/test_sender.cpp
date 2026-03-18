@@ -50,6 +50,21 @@ TEST(sender, open_close) {
     LONGS_EQUAL(0, roc_sender_close(sender));
 }
 
+TEST(sender, open_close_opus) {
+    sender_config.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+    sender_config.packet_length = 20000000ull;
+
+    roc_sender* sender = NULL;
+#ifdef ROC_TARGET_OPUS
+    CHECK(roc_sender_open(context, &sender_config, &sender) == 0);
+    CHECK(sender);
+    LONGS_EQUAL(0, roc_sender_close(sender));
+#else
+    CHECK(roc_sender_open(context, &sender_config, &sender) == -1);
+    CHECK(!sender);
+#endif
+}
+
 TEST(sender, connect) {
     roc_sender* sender = NULL;
     CHECK(roc_sender_open(context, &sender_config, &sender) == 0);
@@ -517,6 +532,25 @@ TEST(sender, bad_config) {
     { // packet_encoding == 99999
         roc_sender_config sender_config_copy = sender_config;
         sender_config_copy.packet_encoding = (roc_packet_encoding)99999;
+
+        roc_sender* sender = NULL;
+        CHECK(roc_sender_open(context, &sender_config_copy, &sender) != 0);
+        CHECK(!sender);
+    }
+    { // Opus packet_length is unsupported
+        roc_sender_config sender_config_copy = sender_config;
+        sender_config_copy.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+        sender_config_copy.packet_length = 7000000ull;
+
+        roc_sender* sender = NULL;
+        CHECK(roc_sender_open(context, &sender_config_copy, &sender) != 0);
+        CHECK(!sender);
+    }
+    { // Opus expected_loss_percent is out of range
+        roc_sender_config sender_config_copy = sender_config;
+        sender_config_copy.packet_encoding = ROC_PACKET_ENCODING_OPUS_STEREO;
+        sender_config_copy.packet_length = 20000000ull;
+        sender_config_copy.opus_expected_loss_percent = 101;
 
         roc_sender* sender = NULL;
         CHECK(roc_sender_open(context, &sender_config_copy, &sender) != 0);

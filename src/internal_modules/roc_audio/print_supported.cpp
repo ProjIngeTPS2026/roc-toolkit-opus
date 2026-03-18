@@ -13,6 +13,7 @@
 #include "roc_audio/sample_format.h"
 #include "roc_core/macro_helpers.h"
 #include "roc_core/printer.h"
+#include "roc_rtp/headers.h"
 
 namespace roc {
 namespace audio {
@@ -83,6 +84,18 @@ void print_channel_names(core::Printer& prn) {
 
 bool print_supported() {
     core::Printer prn;
+
+    prn.writef("\nsupported packet encodings:\n");
+    prn.writef("  l16-mono      payload=%d  pcm/s16be/44100/mono\n",
+               (int)rtp::PayloadType_L16_Mono);
+    prn.writef("  l16-stereo    payload=%d  pcm/s16be/44100/stereo\n",
+               (int)rtp::PayloadType_L16_Stereo);
+#ifdef ROC_TARGET_OPUS
+    prn.writef("  opus-mono     payload=%d  opus/48000/mono\n",
+               (int)rtp::PayloadType_Opus_Mono);
+    prn.writef("  opus-stereo   payload=%d  opus/48000/stereo\n",
+               (int)rtp::PayloadType_Opus_Stereo);
+#endif
 
     prn.writef("\nsupported pcm formats:");
     print_pcm_formats(prn);

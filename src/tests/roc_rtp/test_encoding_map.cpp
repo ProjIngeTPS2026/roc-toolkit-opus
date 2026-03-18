@@ -8,6 +8,7 @@
 
 #include <CppUTest/TestHarness.h>
 
+#include "roc_audio/opus_config.h"
 #include "roc_audio/pcm_decoder.h"
 #include "roc_audio/pcm_encoder.h"
 #include "roc_audio/pcm_format.h"
@@ -63,6 +64,16 @@ TEST(encoding_map, find_by_pt) {
 
         CHECK(enc->new_encoder);
         CHECK(enc->new_decoder);
+    }
+
+    {
+        const Encoding* enc = enc_map.find_by_pt(PayloadType_Opus_Mono);
+        CHECK(!enc);
+    }
+
+    {
+        const Encoding* enc = enc_map.find_by_pt(PayloadType_Opus_Stereo);
+        CHECK(!enc);
     }
 }
 
@@ -149,6 +160,59 @@ TEST(encoding_map, add_encoding) {
         CHECK(enc->new_encoder);
         CHECK(enc->new_decoder);
     }
+}
+
+TEST(encoding_map, add_builtin_opus) {
+    EncodingMap enc_map(arena);
+
+    audio::SampleSpec mono_spec;
+    audio::SampleSpec stereo_spec;
+
+    CHECK(audio::make_opus_sample_spec(1, mono_spec));
+    CHECK(audio::make_opus_sample_spec(2, stereo_spec));
+
+#ifdef ROC_TARGET_OPUS
+    CHECK(enc_map.add_builtin_encoding(PayloadType_Opus_Mono));
+    CHECK(enc_map.add_builtin_encoding(PayloadType_Opus_Stereo));
+    CHECK(enc_map.add_builtin_encoding(PayloadType_Opus_Mono));
+
+    {
+        const Encoding* enc = enc_map.find_by_pt(PayloadType_Opus_Mono);
+        CHECK(enc);
+        LONGS_EQUAL(PayloadType_Opus_Mono, enc->payload_type);
+        CHECK(enc->sample_spec == mono_spec);
+        CHECK(enc->new_encoder);
+        CHECK(enc->new_decoder);
+    }
+
+    {
+        const Encoding* enc = enc_map.find_by_pt(PayloadType_Opus_Stereo);
+        CHECK(enc);
+        LONGS_EQUAL(PayloadType_Opus_Stereo, enc->payload_type);
+        CHECK(enc->sample_spec == stereo_spec);
+        CHECK(enc->new_encoder);
+        CHECK(enc->new_decoder);
+    }
+
+    {
+        const Encoding* enc = enc_map.find_by_spec(mono_spec);
+        CHECK(enc);
+        LONGS_EQUAL(PayloadType_Opus_Mono, enc->payload_type);
+    }
+
+    {
+        const Encoding* enc = enc_map.find_by_spec(stereo_spec);
+        CHECK(enc);
+        LONGS_EQUAL(PayloadType_Opus_Stereo, enc->payload_type);
+    }
+#else
+    CHECK(!enc_map.add_builtin_encoding(PayloadType_Opus_Mono));
+    CHECK(!enc_map.add_builtin_encoding(PayloadType_Opus_Stereo));
+    CHECK(!enc_map.find_by_pt(PayloadType_Opus_Mono));
+    CHECK(!enc_map.find_by_pt(PayloadType_Opus_Stereo));
+    CHECK(!enc_map.find_by_spec(mono_spec));
+    CHECK(!enc_map.find_by_spec(stereo_spec));
+#endif
 }
 
 } // namespace rtp
