@@ -39,6 +39,24 @@ Documentation for the latest release is available [here](https://roc-streaming.o
 
 Additionally, there is also Doxygen-generated documentation for [internal modules](https://roc-streaming.org/toolkit/doxygen/).
 
+Build dependencies
+------------------
+
+On Ubuntu / Debian, install the following packages before building Roc with Opus support:
+
+```bash
+sudo apt-get install g++ pkg-config scons ragel gengetopt libuv1-dev libunwind-dev \
+    libopus-dev libspeexdsp-dev libsox-dev libsndfile1-dev libssl-dev libpulse-dev
+
+sudo apt-get install libtool intltool autoconf automake make cmake
+```
+
+Then build the project with:
+
+```bash
+scons -Q --build-3rdparty=openfec,opus
+```
+
 Build status
 ------------
 
